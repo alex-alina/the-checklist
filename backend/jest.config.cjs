@@ -12,5 +12,12 @@ module.exports = {
       }
     ]
   },
+  globals: {
+    'ts-jest': {
+      tsconfig: {
+        module: 'nodenext'
+      }
+    }
+  },
   extensionsToTreatAsEsm: ['.ts', '.tsx']
 };

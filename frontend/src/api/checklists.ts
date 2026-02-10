@@ -25,6 +25,11 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
 export const fetchChecklists = (): Promise<Checklist[]> =>
   fetch(`${baseUrl}/checklists`).then((response) => handleResponse<Checklist[]>(response));
 
+export const fetchChecklist = (checklistId: string): Promise<Checklist> =>
+  fetch(`${baseUrl}/checklists/${checklistId}`).then((response) =>
+    handleResponse<Checklist>(response)
+  );
+
 export const createChecklist = (checklist: {
   name: string;
   items?: { name: string }[];

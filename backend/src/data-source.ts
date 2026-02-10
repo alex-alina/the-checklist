@@ -2,13 +2,12 @@ import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import dotenv from 'dotenv';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { Checklist } from './entities/Checklist';
 import { Item } from './entities/Item';
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
+const envPath = join(process.cwd(), '../.env');
 
-dotenv.config({ path: join(__dirname, '../../.env') });
+dotenv.config({ path: envPath });
 
 const isTestEnvironment = process.env.NODE_ENV === 'test';
 const isDevelopment = process.env.NODE_ENV === 'development';

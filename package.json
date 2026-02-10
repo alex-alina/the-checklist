@@ -16,7 +16,9 @@
     "test:frontend": "npm run test --workspace frontend",
     "test": "npm run test:backend && npm run test:frontend",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+    "start-fe": "npm run dev --workspace frontend",
+    "start-be": "npm run dev --workspace backend"
   },
   "devDependencies": {
     "prettier": "^3.0.0"

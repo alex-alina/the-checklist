@@ -1,60 +1,22 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import {
-  Checklist,
-  Item as ChecklistItem
-} from './types';
-import {
-  createChecklist,
-  createItem,
-  fetchChecklists,
-  toggleItem
-} from './api/checklists';
+import { FormEvent, useEffect, useState } from 'react';
+import { Checklist as ChecklistProps } from './types';
+import { createChecklist, fetchChecklists } from './api/checklists';
+import { Link } from 'react-router';
+import { Trash2 } from 'lucide-react';
 import './App.css';
 
 export const App = () => {
-  const [checklists, setChecklists] = useState<Checklist[]>([]);
+  const [checklists, setChecklists] = useState<ChecklistProps[]>([]);
   const [newChecklistName, setNewChecklistName] = useState('');
   const [newChecklistItemName, setNewChecklistItemName] = useState('');
-  const [newItemName, setNewItemName] = useState('');
-  const [selectedChecklistId, setSelectedChecklistId] = useState<string | null>(null);
 
-  const selectedChecklist = useMemo(() => {
-    if (selectedChecklistId) {
-      return checklists.find((checklist) => checklist.id === selectedChecklistId) ?? null;
-    }
-    return checklists[0] ?? null;
-  }, [checklists, selectedChecklistId]);
-
-  const shareLink = useMemo(() => {
-    if (!selectedChecklist) {
-      return '';
-    }
-    return `${window.location.origin}?id=${selectedChecklist.id}`;
-  }, [selectedChecklist]);
-
-  const loadChecklists = async (preferredId?: string | null) => {
+  const loadChecklists = async () => {
     const data = await fetchChecklists();
     setChecklists(data);
-    if (!data.length) {
-      setSelectedChecklistId(null);
-      return;
-    }
-    if (preferredId && data.some((checklist) => checklist.id === preferredId)) {
-      setSelectedChecklistId(preferredId);
-      return;
-    }
-    setSelectedChecklistId((current) => {
-      if (current && data.some((checklist) => checklist.id === current)) {
-        return current;
-      }
-      return data[0].id;
-    });
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const sharedId = params.get('id');
-    loadChecklists(sharedId);
+    loadChecklists();
   }, []);
 
   const handleCreateChecklist = async (event: FormEvent) => {
@@ -69,111 +31,58 @@ export const App = () => {
     setChecklists((current) => [...current, checklist]);
     setNewChecklistName('');
     setNewChecklistItemName('');
-    setSelectedChecklistId(checklist.id);
-  };
-
-  const handleAddItem = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!selectedChecklist || !newItemName.trim()) {
-      return;
-    }
-    const item = await createItem(selectedChecklist.id, newItemName.trim());
-    setChecklists((current) =>
-      current.map((checklist) =>
-        checklist.id === selectedChecklist.id
-          ? { ...checklist, items: [...checklist.items, item] }
-          : checklist
-      )
-    );
-    setNewItemName('');
-  };
-
-  const handleToggleItem = async (item: ChecklistItem) => {
-    const updated = await toggleItem(item.id, !item.isChecked);
-    setChecklists((current) =>
-      current.map((checklist) =>
-        checklist.id === updated.checklist.id
-          ? {
-              ...checklist,
-              items: checklist.items.map((currentItem) =>
-                currentItem.id === updated.id ? updated : currentItem
-              )
-            }
-          : checklist
-      )
-    );
   };
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <h1>Checklists</h1>
-        <ul>
-          {checklists.map((checklist) => (
-            <li
-              key={checklist.id}
-              className={checklist.id === selectedChecklist?.id ? 'selected' : ''}
-            >
-              <button type="button" onClick={() => setSelectedChecklistId(checklist.id)}>
-                {checklist.name}
-              </button>
-            </li>
-          ))}
-        </ul>
-        <form onSubmit={handleCreateChecklist} className="form">
-          <label>
-            Name
-            <input
-              value={newChecklistName}
-              onChange={(event) => setNewChecklistName(event.target.value)}
-              placeholder="New checklist"
-            />
-          </label>
-          <label>
-            First item
-            <input
-              value={newChecklistItemName}
-              onChange={(event) => setNewChecklistItemName(event.target.value)}
-              placeholder="Optional item"
-            />
-          </label>
-          <button type="submit">Create checklist</button>
-        </form>
-      </aside>
+    <div className="mx-auto text-gray-800">
+      <div className="flex flex-col lg:flex-col-reverse">
+        <div className="border rounded-xl border-blue-800 p-10 sm:max-w-xl flex flex-col text-lg m-5">
+          <h1 className="text-3xl mb-4">My Checklists</h1>
+          <ul className="text-xl">
+            {checklists.map((checklist) => (
+              <li key={checklist.id} className="mb-4 flex justify-between">
+                <Link
+                  to={`/checklist/${checklist.id}`}
+                  className="text-ellipsis max-w-48 sm:max-w-xl"
+                  data-testid={`list-${checklist.id}`}
+                >
+                  {checklist.name}
+                </Link>
+                <button className="w-8 h-8 hover:border-red-800 hover:bg-red-800  text-red-800 hover:text-white rounded-full flex items-center justify-center border border-red-800">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <main className="panel">
-        {selectedChecklist ? (
-          <>
-            <header>
-              <h2>{selectedChecklist.name}</h2>
-              <p>Share: <code>{shareLink}</code></p>
-            </header>
-            <section className="items">
-              {selectedChecklist.items.map((item) => (
-                <label key={item.id} className="item">
-                  <input
-                    type="checkbox"
-                    checked={item.isChecked}
-                    onChange={() => handleToggleItem(item)}
-                  />
-                  <span>{item.name}</span>
-                </label>
-              ))}
-              {!selectedChecklist.items.length && <p>No items yet.</p>}
-            </section>
-            <form onSubmit={handleAddItem} className="form">
+        <div className="border rounded-xl border-blue-800 sm:max-w-xl p-10 m-5 flex flex-col text-lg">
+          <p className="text-3xl">Create new checklist</p>
+          <form onSubmit={handleCreateChecklist} className="flex flex-col gap-0.5 mt-4">
+            <label className="flex flex-col">
+              Checklist Name
               <input
-                value={newItemName}
-                onChange={(event) => setNewItemName(event.target.value)}
-                placeholder="Add new item"
+                value={newChecklistName}
+                onChange={(event) => setNewChecklistName(event.target.value)}
+                placeholder="New checklist name"
+                className="p-2 border border-b-blue-900 rounded-md my-2"
               />
-              <button type="submit">Add item</button>
-            </form>
-          </>
-        ) : (
-          <p>Select or create a checklist to get started.</p>
-        )}
-      </main>
+            </label>
+            <label className="flex flex-col mt-2">
+              First item
+              <input
+                value={newChecklistItemName}
+                onChange={(event) => setNewChecklistItemName(event.target.value)}
+                placeholder="Optional item"
+                className="p-2 border border-b-blue-90 rounded-md my-2"
+              />
+            </label>
+            <button type="submit" className="bg-blue-800 p-3 mt-4 text-white rounded-md">
+              Add checklist
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

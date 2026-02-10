@@ -1,4 +1,4 @@
-.app-shell {
+/* .app-shell {
   display: grid;
   grid-template-columns: 280px 1fr;
   min-height: 100vh;
@@ -79,4 +79,4 @@
   padding: 0.65rem;
   border-radius: 4px;
   cursor: pointer;
-}
+} */

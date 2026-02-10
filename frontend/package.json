@@ -7,13 +7,16 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "test": "NODE_ENV=test jest",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0",
-    "start-fe": "npm run dev --workspace frontend",
-    "start-be": "npm run dev --workspace backend"
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.563.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router": "^7.13.0",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.0.0",
@@ -22,19 +25,19 @@
     "@types/jest": "^29.5.3",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.0.0",
-    "jest": "^29.6.0",
-    "ts-jest": "^29.1.1",
-    "jest-environment-jsdom": "^29.6.0",
-    "typescript": "^5.6.2",
-    "vite": "^5.0.0",
-    "identity-obj-proxy": "^3.0.0",
-    "eslint": "^8.56.0",
-    "@typescript-eslint/parser": "^7.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.0",
     "eslint-plugin-react": "^7.35.0",
-    "eslint-plugin-react-hooks": "^4.6.0"
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.6.0",
+    "jest-environment-jsdom": "^29.6.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.6.2",
+    "vite": "^5.0.0"
   }
 }

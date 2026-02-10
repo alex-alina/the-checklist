@@ -4,6 +4,8 @@
     "outDir": "dist",
     "rootDir": "src",
     "noEmit": false,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "types": ["node", "jest"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
