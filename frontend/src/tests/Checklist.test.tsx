@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { Checklist } from '../pages/Checklist';
 import * as api from '../api/checklists';
@@ -18,6 +18,7 @@ describe('Checklist', () => {
   const mockedFetchChecklist = api.fetchChecklist as jest.MockedFunction<typeof api.fetchChecklist>;
   const mockedCreateItem = api.createItem as jest.MockedFunction<typeof api.createItem>;
   const mockedToggleItem = api.toggleItem as jest.MockedFunction<typeof api.toggleItem>;
+  const mockedDeleteItem = api.deleteChecklistItem as jest.MockedFunction<typeof api.deleteChecklistItem>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,6 +28,7 @@ describe('Checklist', () => {
       isChecked: false,
       checklist: { id: 'checklist-1' }
     });
+    mockedDeleteItem.mockResolvedValue(204);
   });
 
   it('loads the checklist and displays items', async () => {
@@ -107,5 +109,43 @@ describe('Checklist', () => {
 
     await waitFor(() => expect(checkbox).toBeChecked());
     expect(mockedToggleItem).toHaveBeenCalledWith('item-1', true);
+  });
+
+  it('deletes an item when the delete API succeeds', async () => {
+    mockedFetchChecklist.mockResolvedValue({
+      id: 'checklist-1',
+      name: 'Work',
+      items: [
+        { id: 'item-1', name: 'Write tests', isChecked: false, checklist: { id: 'checklist-1' } }
+      ]
+    });
+
+    renderChecklist();
+
+    const itemContainer = await screen.findByText('Write tests');
+    const button = within(itemContainer.closest('div')!).getByRole('button');
+    fireEvent.click(button);
+
+    await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('item-1'));
+    await waitFor(() => expect(screen.queryByText('Write tests')).not.toBeInTheDocument());
+  });
+
+  it('keeps the item when the delete API returns a non-204 status', async () => {
+    mockedFetchChecklist.mockResolvedValue({
+      id: 'checklist-1',
+      name: 'Tasks',
+      items: [
+        { id: 'item-2', name: 'Plan sprint', isChecked: false, checklist: { id: 'checklist-1' } }
+      ]
+    });
+    mockedDeleteItem.mockResolvedValue(404);
+
+    renderChecklist();
+
+    const itemContainer = await screen.findByText('Plan sprint');
+    fireEvent.click(within(itemContainer.closest('div')!).getByRole('button'));
+
+    await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('item-2'));
+    expect(screen.getByText('Plan sprint')).toBeInTheDocument();
   });
 });

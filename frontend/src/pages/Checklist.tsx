@@ -1,8 +1,14 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Checklist as ChecklistProps, Item as ChecklistItem } from '../types';
-import { createItem, deleteChecklist, fetchChecklist, toggleItem } from '../api/checklists';
+import {
+  createItem,
+  deleteChecklist,
+  deleteChecklistItem,
+  fetchChecklist,
+  toggleItem
+} from '../api/checklists';
 import { Link, useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Share2, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Share2, PlusCircle } from 'lucide-react';
 import { DangerButtonRound } from '../components/DangerButtonRound';
 import { PrimaryButton } from '../components/PrimaryButton';
 
@@ -56,11 +62,24 @@ export const Checklist = () => {
     });
   };
 
+  const handleDeleteItem = async (itemId: string) => {
+    const status = await deleteChecklistItem(itemId);
+    if (status !== 204) {
+      return;
+    }
+
+    setChecklist((checklist) => ({
+      ...checklist,
+      items: checklist.items.filter((item) => item.id !== itemId)
+    }));
+  };
+
   const handleDeleteList = async (checklistId: string) => {
     const status = await deleteChecklist(checklistId);
     if (status === 204) {
       navigate('/');
     }
+    //TODO show success / error message?
   };
 
   return (
@@ -82,7 +101,7 @@ export const Checklist = () => {
           <header className="flex flex-col justify-center items-center">
             <div className="flex items-center">
               <h2 className="text-3xl my-6 mr-4">{checklist && checklist.name}</h2>
-              <DangerButtonRound handleClick={() => handleDeleteList(checklist.id)} />
+              <DangerButtonRound onClick={() => handleDeleteList(checklist.id)} />
             </div>
 
             <form onSubmit={handleAddItem} className="flex flex-row justify-center items-center">
@@ -110,9 +129,7 @@ export const Checklist = () => {
                     />
                     <span className="ml-2 text-xl">{item.name}</span>
                   </label>
-                  <button className="w-6 h-6 hover:border-red-800 hover:bg-red-800  text-red-800 hover:text-white rounded-full flex items-center justify-center border border-red-800">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
                 </div>
               ))}
             {checklist && !checklist.items.length && <p>No items yet.</p>}

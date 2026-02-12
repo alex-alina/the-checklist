@@ -65,7 +65,7 @@ export const App = () => {
                 >
                   {checklist.name}
                 </Link>
-                <DangerButtonRound handleClick={() => handleDeleteList(checklist.id)} />
+                <DangerButtonRound onClick={() => handleDeleteList(checklist.id)} />
               </li>
             ))}
           </ul>
@@ -94,9 +94,6 @@ export const App = () => {
             <PrimaryButton type="submit" className="mt-4">
               Add checklist
             </PrimaryButton>
-            {/* <button type="submit" className="bg-blue-800 p-3 mt-4 text-white rounded-md">
-              Add checklist
-            </button> */}
           </form>
         </div>
       </div>
