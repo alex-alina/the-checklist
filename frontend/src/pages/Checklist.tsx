@@ -1,8 +1,10 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Checklist as ChecklistProps, Item as ChecklistItem } from '../types';
-import { createItem, fetchChecklist, toggleItem } from '../api/checklists';
-import { Link, useParams } from 'react-router';
+import { createItem, deleteChecklist, fetchChecklist, toggleItem } from '../api/checklists';
+import { Link, useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Share2, PlusCircle, Trash2 } from 'lucide-react';
+import { DangerButtonRound } from '../components/DangerButtonRound';
+import { PrimaryButton } from '../components/PrimaryButton';
 
 export const Checklist = () => {
   const initialChecklistState = {
@@ -10,6 +12,8 @@ export const Checklist = () => {
     name: '',
     items: []
   };
+
+  const navigate = useNavigate();
   const [newItemName, setNewItemName] = useState('');
   const [checklist, setChecklist] = useState<ChecklistProps>(initialChecklistState);
 
@@ -52,28 +56,33 @@ export const Checklist = () => {
     });
   };
 
+  const handleDeleteList = async (checklistId: string) => {
+    const status = await deleteChecklist(checklistId);
+    if (status === 204) {
+      navigate('/');
+    }
+  };
+
   return (
     <div className="p-4 sm:p-8">
       <div className="flex justify-between">
         <Link to="/">
-          <button className="flex justify-between bg-blue-800 py-2 px-3 text-md text-white rounded-md w-40">
-            <ArrowLeft className="w-5 h-5" />
+          <PrimaryButton type="submit" className="w-40">
+            <ArrowLeft className="w-5 h-5 mr-2" />
             Go back to lists
-          </button>
+          </PrimaryButton>
         </Link>
-        <button className="flex justify-between bg-blue-800 py-2 px-3 text-md text-white rounded-md w-40">
-          <Share2 className="w-5 h-5" />
+        <PrimaryButton className="w-40">
+          <Share2 className="w-5 h-5 mr-2" />
           Share checklist
-        </button>
+        </PrimaryButton>
       </div>
       {checklist && checklist.id ? (
         <div className="flex flex-col justify-center items-center w-fit max-w-xl mx-auto">
           <header className="flex flex-col justify-center items-center">
             <div className="flex items-center">
               <h2 className="text-3xl my-6 mr-4">{checklist && checklist.name}</h2>
-              <button className="w-7 h-7 hover:border-red-800 hover:bg-red-800  text-red-800 hover:text-white rounded-full flex items-center justify-center border border-red-800">
-                <Trash2 className="w-5 h-5" />
-              </button>
+              <DangerButtonRound handleClick={() => handleDeleteList(checklist.id)} />
             </div>
 
             <form onSubmit={handleAddItem} className="flex flex-row justify-center items-center">
@@ -83,13 +92,10 @@ export const Checklist = () => {
                 placeholder="Add new item"
                 className="block p-2 border border-b-blue-90 rounded-md my-2 sm:w-80 w-50"
               />
-              <button
-                type="submit"
-                className="flex justify-between items-center bg-blue-800 px-3 h-10 w-28 sm:w-30 ml-4 text-white rounded-md "
-              >
-                <PlusCircle className="w-5 h-5" />
+              <PrimaryButton type="submit" className="h-10 w-28 sm:w-30 ml-4">
+                <PlusCircle className="w-5 h-5 mr-2" />
                 Add item
-              </button>
+              </PrimaryButton>
             </form>
           </header>
           <div className="flex flex-col w-full mt-6">
@@ -113,7 +119,7 @@ export const Checklist = () => {
           </div>
         </div>
       ) : (
-        <p>No checklist with this name exists</p>
+        <div className="text-xl italic w-fit mx-auto">Ups! This checklist does not exist.</div>
       )}
     </div>
   );

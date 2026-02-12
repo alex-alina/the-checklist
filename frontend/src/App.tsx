@@ -1,9 +1,11 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Checklist as ChecklistProps } from './types';
-import { createChecklist, fetchChecklists } from './api/checklists';
+import { createChecklist, deleteChecklist, fetchChecklists } from './api/checklists';
 import { Link } from 'react-router';
-import { Trash2 } from 'lucide-react';
 import './App.css';
+import { DangerButtonRound } from './components/DangerButtonRound';
+import { Input } from './components/Input';
+import { PrimaryButton } from './components/PrimaryButton';
 
 export const App = () => {
   const [checklists, setChecklists] = useState<ChecklistProps[]>([]);
@@ -33,6 +35,21 @@ export const App = () => {
     setNewChecklistItemName('');
   };
 
+  const handleDeleteList = async (checklistId: string) => {
+    const status = await deleteChecklist(checklistId);
+    if (status === 204) {
+      setChecklists((currentLists) => {
+        const updatedChecklists = [];
+        for (const checklist of currentLists) {
+          if (checklistId !== checklist.id) {
+            updatedChecklists.push(checklist);
+          }
+        }
+        return updatedChecklists;
+      });
+    }
+  };
+
   return (
     <div className="mx-auto text-gray-800">
       <div className="flex flex-col lg:flex-col-reverse">
@@ -48,12 +65,11 @@ export const App = () => {
                 >
                   {checklist.name}
                 </Link>
-                <button className="w-8 h-8 hover:border-red-800 hover:bg-red-800  text-red-800 hover:text-white rounded-full flex items-center justify-center border border-red-800">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <DangerButtonRound handleClick={() => handleDeleteList(checklist.id)} />
               </li>
             ))}
           </ul>
+          {checklists.length === 0 && <p>Get organised! Create your first checklist.</p>}
         </div>
 
         <div className="border rounded-xl border-blue-800 sm:max-w-xl p-10 m-5 flex flex-col text-lg">
@@ -61,25 +77,26 @@ export const App = () => {
           <form onSubmit={handleCreateChecklist} className="flex flex-col gap-0.5 mt-4">
             <label className="flex flex-col">
               Checklist Name
-              <input
+              <Input
                 value={newChecklistName}
                 onChange={(event) => setNewChecklistName(event.target.value)}
                 placeholder="New checklist name"
-                className="p-2 border border-b-blue-900 rounded-md my-2"
               />
             </label>
             <label className="flex flex-col mt-2">
               First item
-              <input
+              <Input
                 value={newChecklistItemName}
                 onChange={(event) => setNewChecklistItemName(event.target.value)}
                 placeholder="Optional item"
-                className="p-2 border border-b-blue-90 rounded-md my-2"
               />
             </label>
-            <button type="submit" className="bg-blue-800 p-3 mt-4 text-white rounded-md">
+            <PrimaryButton type="submit" className="mt-4">
               Add checklist
-            </button>
+            </PrimaryButton>
+            {/* <button type="submit" className="bg-blue-800 p-3 mt-4 text-white rounded-md">
+              Add checklist
+            </button> */}
           </form>
         </div>
       </div>

@@ -40,6 +40,12 @@ export const createChecklist = (checklist: {
     body: JSON.stringify(checklist)
   }).then((response) => handleResponse<Checklist>(response));
 
+export const deleteChecklist = (checklistId: string): Promise<number> =>
+  fetch(`${baseUrl}/checklists/${checklistId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  }).then((response) => response.status);
+
 export const createItem = (checklistId: string, name: string): Promise<Item> =>
   fetch(`${baseUrl}/items`, {
     method: 'POST',
