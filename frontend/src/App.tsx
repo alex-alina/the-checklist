@@ -6,7 +6,7 @@ import './App.css';
 import { DangerButtonRound } from './components/ui/DangerButtonRound';
 import { Input } from './components/ui/Input';
 import { PrimaryButton } from './components/ui/PrimaryButton';
-import { WordGuess } from './components/ui/WordGuessing';
+import { WordGuess } from './components/WordGuessing';
 
 export const App = () => {
   const [checklists, setChecklists] = useState<ChecklistProps[]>([]);

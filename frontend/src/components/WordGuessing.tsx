@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Input } from './Input';
-import { PrimaryButton } from './PrimaryButton';
-import capibara from '../../assets/capibara.jpg';
+import { Input } from './ui/Input';
+import { PrimaryButton } from './ui/PrimaryButton';
+import capibara from '../assets/capibara.jpg';
 
 export const shiftWord = (word: string, key: number) => {
   const shift = key % 26;
