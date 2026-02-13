@@ -3,15 +3,15 @@ import { Checklist as ChecklistProps } from './types';
 import { createChecklist, deleteChecklist, fetchChecklists } from './api/checklists';
 import { Link } from 'react-router';
 import './App.css';
-import { DangerButtonRound } from './components/DangerButtonRound';
-import { Input } from './components/Input';
-import { PrimaryButton } from './components/PrimaryButton';
+import { DangerButtonRound } from './components/ui/DangerButtonRound';
+import { Input } from './components/ui/Input';
+import { PrimaryButton } from './components/ui/PrimaryButton';
+import { WordGuess } from './components/ui/WordGuessing';
 
 export const App = () => {
   const [checklists, setChecklists] = useState<ChecklistProps[]>([]);
   const [newChecklistName, setNewChecklistName] = useState('');
   const [newChecklistItemName, setNewChecklistItemName] = useState('');
-
   const loadChecklists = async () => {
     const data = await fetchChecklists();
     setChecklists(data);
@@ -51,7 +51,7 @@ export const App = () => {
   };
 
   return (
-    <div className="mx-auto text-gray-800">
+    <div className="mx-auto text-gray-800 flex flex-col md:flex-row">
       <div className="flex flex-col lg:flex-col-reverse">
         <div className="border rounded-xl border-blue-800 p-10 sm:max-w-xl flex flex-col text-lg m-5">
           <h1 className="text-3xl mb-4">My Checklists</h1>
@@ -96,6 +96,9 @@ export const App = () => {
             </PrimaryButton>
           </form>
         </div>
+      </div>
+      <div>
+        <WordGuess />
       </div>
     </div>
   );
