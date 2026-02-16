@@ -64,7 +64,7 @@ export const WordGuess = () => {
       <div className="border rounded-xl border-blue-800 p-10 flex flex-col text-lg m-5">
         <div className="flex flex-col justify-center items-center">
           <div className="w-full flex justify-between">
-            <div className="text-2xl">Decode the funny word.</div>
+            <div className="text-2xl">Decode the funny word below</div>
             <PrimaryButton
               onClick={() => {
                 const newcodedWord = randomWordSelector();
@@ -84,7 +84,7 @@ export const WordGuess = () => {
         </div>
 
         <label className="flex flex-col mt-2">
-          Funny word here:
+          Type funny word here:
           <Input
             value={decodedWord}
             onChange={(event) => setDecodedWord(event.target.value)}

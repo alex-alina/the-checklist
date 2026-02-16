@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Checklist as ChecklistProps, Item as ChecklistItem } from '../types';
 import {
   createItem,
@@ -8,9 +8,9 @@ import {
   toggleItem
 } from '../api/checklists';
 import { Link, useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Share2, PlusCircle } from 'lucide-react';
-import { DangerButtonRound } from '../components/DangerButtonRound';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { ArrowLeft, Share2, PlusCircle, CheckCircle2 } from 'lucide-react';
+import { DangerButtonRound } from '../components/ui/DangerButtonRound';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
 
 export const Checklist = () => {
   const initialChecklistState = {
@@ -22,16 +22,22 @@ export const Checklist = () => {
   const navigate = useNavigate();
   const [newItemName, setNewItemName] = useState('');
   const [checklist, setChecklist] = useState<ChecklistProps>(initialChecklistState);
-
-  //TODO: add share list url button
+  const [showDeleteListError, setShowDeleteListError] = useState(false);
+  const [shareMessage, setShareMessage] = useState('');
   const params = useParams();
-  // console.log('Share List URL', window.location.href);
+
+  const shareUrl = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+
+    return window.location.href;
+  }, []);
 
   const loadChecklist = async (checklistId: string) => {
     const data = await fetchChecklist(checklistId);
     setChecklist(data);
   };
-  //Check with Adi, what to do in case of no checklist / error
 
   useEffect(() => {
     params.id && loadChecklist(params.id);
@@ -76,29 +82,85 @@ export const Checklist = () => {
 
   const handleDeleteList = async (checklistId: string) => {
     const status = await deleteChecklist(checklistId);
-    if (status === 204) {
+    if (status !== 204) {
+      setShowDeleteListError(true);
+    } else {
       navigate('/');
     }
-    //TODO show success / error message?
   };
+
+  const shareChecklistUrl = async () => {
+    const url = shareUrl;
+    if (!url) {
+      setShareMessage('The share URL is not accessible.');
+      return;
+    }
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          title: checklist.name,
+          text: `Take a look at this checklist named ${checklist.name}.`,
+          url
+        });
+        setShareMessage('Share dialog opened.');
+        return;
+      }
+
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setShareMessage('Checklist URL copied to clipboard.');
+        return;
+      }
+
+      setShareMessage('Clipboard support is unavailable.');
+    } catch (error) {
+      setShareMessage('Unable to share the checklist right now.');
+    }
+  };
+
+  useEffect(() => {
+    if (!shareMessage) {
+      return;
+    }
+
+    const timer = setTimeout(() => setShareMessage(''), 3000);
+    return () => clearTimeout(timer);
+  }, [shareMessage]);
 
   return (
     <div className="p-4 sm:p-8">
-      <div className="flex justify-between">
-        <Link to="/">
-          <PrimaryButton type="submit" className="w-40">
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Go back to lists
+      <div className="flex flex-col  items-center h-28">
+        <div className="flex justify-between w-full">
+          <Link to="/">
+            <PrimaryButton type="submit" className="w-40">
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Go back to lists
+            </PrimaryButton>
+          </Link>
+          <PrimaryButton type="button" className="w-40" onClick={shareChecklistUrl}>
+            <Share2 className="w-5 h-5 mr-2" />
+            Share checklist
           </PrimaryButton>
-        </Link>
-        <PrimaryButton className="w-40">
-          <Share2 className="w-5 h-5 mr-2" />
-          Share checklist
-        </PrimaryButton>
+        </div>
+        {shareMessage && (
+          <div
+            className="flex text-md text-green-700 border border-green-600 rounded w-fit mt-2 px-3 py-2"
+            aria-live="polite"
+          >
+            <CheckCircle2 className="w-5 h-5 mr-3" />
+            {shareMessage}
+          </div>
+        )}
       </div>
       {checklist && checklist.id ? (
         <div className="flex flex-col justify-center items-center w-fit max-w-xl mx-auto">
           <header className="flex flex-col justify-center items-center">
+            {showDeleteListError && (
+              <div className="text-lg px-3 py-2 text-red-800 border border-red-800 rounded-xl">
+                Someting went wrong. Please try again.
+              </div>
+            )}
             <div className="flex items-center">
               <h2 className="text-3xl my-6 mr-4">{checklist && checklist.name}</h2>
               <DangerButtonRound onClick={() => handleDeleteList(checklist.id)} />
@@ -112,7 +174,7 @@ export const Checklist = () => {
                 className="block p-2 border border-b-blue-90 rounded-md my-2 sm:w-80 w-50"
               />
               <PrimaryButton type="submit" className="h-10 w-28 sm:w-30 ml-4">
-                <PlusCircle className="w-5 h-5 mr-2" />
+                <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Add item
               </PrimaryButton>
             </form>
@@ -120,7 +182,10 @@ export const Checklist = () => {
           <div className="flex flex-col w-full mt-6">
             {checklist &&
               checklist.items.map((item) => (
-                <div key={item.id} className="flex justify-between items-center mb-2">
+                <div
+                  key={item.id}
+                  className="flex justify-between items-center w-80 sm:w-full mb-2"
+                >
                   <label className="flex items-center">
                     <input
                       type="checkbox"
@@ -132,7 +197,7 @@ export const Checklist = () => {
                   <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
                 </div>
               ))}
-            {checklist && !checklist.items.length && <p>No items yet.</p>}
+            {checklist && !checklist.items.length && <p>Add some items to your checklist.</p>}
           </div>
         </div>
       ) : (

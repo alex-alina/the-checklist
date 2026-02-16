@@ -15,13 +15,40 @@ const renderChecklist = () =>
   );
 
 describe('Checklist', () => {
+  const originalNavigatorShareDescriptor = Object.getOwnPropertyDescriptor(globalThis.navigator, 'share');
+  const originalNavigatorClipboardDescriptor = Object.getOwnPropertyDescriptor(
+    globalThis.navigator,
+    'clipboard'
+  );
+  const sharePath = '/checklist/checklist-1';
+
+  const restoreNavigatorProperty = (
+    prop: 'share' | 'clipboard',
+    descriptor?: PropertyDescriptor
+  ) => {
+    if (descriptor) {
+      Object.defineProperty(globalThis.navigator, prop, descriptor);
+      return;
+    }
+
+    Reflect.deleteProperty(globalThis.navigator, prop);
+  };
+
+  const setChecklistShareLocation = () => {
+    window.history.replaceState({}, '', sharePath);
+    return window.location.href;
+  };
+
   const mockedFetchChecklist = api.fetchChecklist as jest.MockedFunction<typeof api.fetchChecklist>;
   const mockedCreateItem = api.createItem as jest.MockedFunction<typeof api.createItem>;
   const mockedToggleItem = api.toggleItem as jest.MockedFunction<typeof api.toggleItem>;
-  const mockedDeleteItem = api.deleteChecklistItem as jest.MockedFunction<typeof api.deleteChecklistItem>;
+  const mockedDeleteItem = api.deleteChecklistItem as jest.MockedFunction<
+    typeof api.deleteChecklistItem
+  >;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    window.history.replaceState({}, '', '/');
     mockedCreateItem.mockResolvedValue({
       id: 'item-new',
       name: 'New entry',
@@ -29,6 +56,12 @@ describe('Checklist', () => {
       checklist: { id: 'checklist-1' }
     });
     mockedDeleteItem.mockResolvedValue(204);
+  });
+
+  afterEach(() => {
+    restoreNavigatorProperty('share', originalNavigatorShareDescriptor);
+    restoreNavigatorProperty('clipboard', originalNavigatorClipboardDescriptor);
+    window.history.replaceState({}, '', '/');
   });
 
   it('loads the checklist and displays items', async () => {
@@ -55,7 +88,7 @@ describe('Checklist', () => {
 
     renderChecklist();
 
-    expect(await screen.findByText('No items yet.')).toBeInTheDocument();
+    expect(await screen.findByText('Add some items to your checklist.')).toBeInTheDocument();
   });
 
   it('adds a new item and resets the input', async () => {
@@ -147,5 +180,79 @@ describe('Checklist', () => {
 
     await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('item-2'));
     expect(screen.getByText('Plan sprint')).toBeInTheDocument();
+  });
+
+  describe('sharing the checklist URL', () => {
+    const shareButton = () => screen.getByRole('button', { name: /share checklist/i });
+
+    const prepareShareFlow = async (checklistName = 'Daily') => {
+      const shareUrl = setChecklistShareLocation();
+      mockedFetchChecklist.mockResolvedValue({
+        id: 'checklist-1',
+        name: checklistName,
+        items: []
+      });
+      renderChecklist();
+      await screen.findByRole('heading', { name: checklistName });
+      return shareUrl;
+    };
+
+    it('opens the native share dialog when available', async () => {
+      const shareMock = jest.fn().mockResolvedValue(undefined);
+      Object.defineProperty(globalThis.navigator, 'share', {
+        configurable: true,
+        value: shareMock
+      });
+
+      const shareUrl = await prepareShareFlow('Daily');
+      fireEvent.click(shareButton());
+
+      await waitFor(() =>
+        expect(shareMock).toHaveBeenCalledWith({
+          title: 'Daily',
+          text: 'Take a look at this checklist named Daily.',
+          url: shareUrl
+        })
+      );
+      expect(await screen.findByText('Share dialog opened.')).toBeInTheDocument();
+    });
+
+    it('copies the URL to clipboard when share is unavailable', async () => {
+      Reflect.deleteProperty(globalThis.navigator, 'share');
+      const writeText = jest.fn().mockResolvedValue(undefined);
+      Object.defineProperty(globalThis.navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText }
+      });
+
+      const shareUrl = await prepareShareFlow('Work');
+      fireEvent.click(shareButton());
+
+      await waitFor(() => expect(writeText).toHaveBeenCalledWith(shareUrl));
+      expect(await screen.findByText('Checklist URL copied to clipboard.')).toBeInTheDocument();
+    });
+
+    it('shows a message when clipboard support is unavailable', async () => {
+      Reflect.deleteProperty(globalThis.navigator, 'share');
+      Reflect.deleteProperty(globalThis.navigator, 'clipboard');
+
+      await prepareShareFlow('Tasks');
+      fireEvent.click(shareButton());
+
+      expect(await screen.findByText('Clipboard support is unavailable.')).toBeInTheDocument();
+    });
+
+    it('displays an error message when sharing fails', async () => {
+      const shareMock = jest.fn().mockRejectedValue(new Error('share failed'));
+      Object.defineProperty(globalThis.navigator, 'share', {
+        configurable: true,
+        value: shareMock
+      });
+
+      await prepareShareFlow('Work');
+      fireEvent.click(shareButton());
+
+      expect(await screen.findByText('Unable to share the checklist right now.')).toBeInTheDocument();
+    });
   });
 });
