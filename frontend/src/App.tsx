@@ -57,7 +57,7 @@ export const App = () => {
           <h1 className="text-3xl mb-4">My Checklists</h1>
           <ul className="text-xl">
             {checklists.map((checklist) => (
-              <li key={checklist.id} className="mb-4 flex justify-between">
+              <li key={checklist.id} className="mb-4 flex justify-between underline text-blue-800">
                 <Link
                   to={`/checklist/${checklist.id}`}
                   className="text-ellipsis max-w-48 sm:max-w-xl"

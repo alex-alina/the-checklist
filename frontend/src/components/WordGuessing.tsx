@@ -63,8 +63,8 @@ export const WordGuess = () => {
       </div>
       <div className="border rounded-xl border-blue-800 p-10 flex flex-col text-lg m-5">
         <div className="flex flex-col justify-center items-center">
-          <div className="w-full flex justify-between">
-            <div className="text-2xl">Decode the funny word below</div>
+          <div className="w-full flex items-center justify-between">
+            <div className="text-lg sm:text-2xl">Decode the funny word below</div>
             <PrimaryButton
               onClick={() => {
                 const newcodedWord = randomWordSelector();
@@ -72,7 +72,7 @@ export const WordGuess = () => {
                 setCodedWord(newcodedWord);
                 setWordIndex(newIndex);
               }}
-              className=""
+              className="h-10 w-28 sm:w-30 ml-4 text-sm lg:text-lg"
             >
               New code
             </PrimaryButton>
@@ -93,9 +93,9 @@ export const WordGuess = () => {
         </label>
 
         {isDecodedCorrectly && (
-          <div className="flex flex-col items-center justify-center ">
+          <div className="flex flex-col items-center justify-center">
             <h3 className="text-blue-700 text-2xl my-4">Amazing job! &#127881;</h3>
-            <p>Have a chuckle and a break with these cute capibaras.</p>
+            <p className="text-center">Have a chuckle and a break with these cute capibaras.</p>
             <img src={capibara} className="w-96 h-fit" />
           </div>
         )}
