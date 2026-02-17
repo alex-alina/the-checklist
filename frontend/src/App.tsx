@@ -7,6 +7,7 @@ import { DangerButtonRound } from './components/ui/DangerButtonRound';
 import { Input } from './components/ui/Input';
 import { PrimaryButton } from './components/ui/PrimaryButton';
 import { WordGuess } from './components/WordGuessing';
+import { Card } from './components/ui/Card';
 
 export const App = () => {
   const [checklists, setChecklists] = useState<ChecklistProps[]>([]);
@@ -53,7 +54,7 @@ export const App = () => {
   return (
     <div className="mx-auto text-gray-800 flex flex-col md:flex-row">
       <div className="flex flex-col lg:flex-col-reverse">
-        <div className="border rounded-xl border-blue-800 p-10 sm:max-w-xl flex flex-col text-lg m-5">
+        <Card className=" m-5">
           <h1 className="text-3xl mb-4">My Checklists</h1>
           <ul className="text-xl">
             {checklists.map((checklist) => (
@@ -70,9 +71,9 @@ export const App = () => {
             ))}
           </ul>
           {checklists.length === 0 && <p>Get organised! Create your first checklist.</p>}
-        </div>
+        </Card>
 
-        <div className="border rounded-xl border-blue-800 sm:max-w-xl p-10 m-5 flex flex-col text-lg">
+        <Card className="m-5">
           <p className="text-3xl">Create new checklist</p>
           <form onSubmit={handleCreateChecklist} className="flex flex-col gap-0.5 mt-4">
             <label className="flex flex-col">
@@ -95,11 +96,15 @@ export const App = () => {
               Add checklist
             </PrimaryButton>
           </form>
-        </div>
+        </Card>
       </div>
-      <div>
-        <WordGuess />
-      </div>
+
+      <WordGuess />
+
+      <Card>
+        Wanna waste some time with someting else?
+        <PrimaryButton>Tic Tac Toe</PrimaryButton>
+      </Card>
     </div>
   );
 };
