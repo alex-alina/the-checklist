@@ -73,7 +73,7 @@ export const WordGuess = () => {
 
         {isDecodedCorrectly && (
           <div className="flex flex-col items-center justify-center">
-            <h3 className="text-blue-700 text-2xl my-4">Amazing job! &#127881;</h3>
+            <h3 className="text-blue-700 text-2xl my-4">Amazing job!&#127881;</h3>
             <p className="text-center">{text}</p>
             <img src={img} className="w-96 h-fit" />
           </div>

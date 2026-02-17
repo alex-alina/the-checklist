@@ -21,5 +21,5 @@ export const FUNNY_WORDS = [
 export const codeGamePrizes = [
   { img: capibara, text: 'Have a chuckle and a break with these cute capibaras.' },
   { img: coffee, text: 'You deserve a coffee break.' },
-  { img: share, text: 'You rock, share a coffee with a friend' }
+  { img: share, text: 'You rock, share a coffee with a friend.' }
 ];
