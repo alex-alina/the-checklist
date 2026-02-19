@@ -40,7 +40,7 @@ export const App = () => {
     const status = await deleteChecklist(checklistId);
     if (status === 204) {
       setChecklists((currentLists) => {
-        const updatedChecklists = [];
+        const updatedChecklists: ChecklistProps[] = [];
         for (const checklist of currentLists) {
           if (checklistId !== checklist.id) {
             updatedChecklists.push(checklist);
@@ -103,7 +103,9 @@ export const App = () => {
 
       <Card>
         Wanna waste some time with someting else?
-        <PrimaryButton>Tic Tac Toe</PrimaryButton>
+        <Link to={'tic-tac-toe'}>
+          <PrimaryButton>Tic Tac Toe</PrimaryButton>
+        </Link>
       </Card>
     </div>
   );
