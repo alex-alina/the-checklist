@@ -96,16 +96,19 @@ const Board = ({ xIsNext, cells, onPlay, totalMoves }: BoardProps) => {
         <div>
           <Row>
             <Cell
+              data-testid="cell-0"
               cellValue={cells[0]}
               onClick={() => handleClick(0)}
               isWinnerCell={winningIndexes?.includes(0)}
             />
             <Cell
+              data-testid="cell-1"
               cellValue={cells[1]}
               onClick={() => handleClick(1)}
               isWinnerCell={winningIndexes?.includes(1)}
             />
             <Cell
+              data-testid="cell-2"
               cellValue={cells[2]}
               onClick={() => handleClick(2)}
               isWinnerCell={winningIndexes?.includes(2)}
@@ -113,16 +116,19 @@ const Board = ({ xIsNext, cells, onPlay, totalMoves }: BoardProps) => {
           </Row>
           <Row>
             <Cell
+              data-testid="cell-3"
               cellValue={cells[3]}
               onClick={() => handleClick(3)}
               isWinnerCell={winningIndexes?.includes(3)}
             />
             <Cell
+              data-testid="cell-4"
               cellValue={cells[4]}
               onClick={() => handleClick(4)}
               isWinnerCell={winningIndexes?.includes(4)}
             />
             <Cell
+              data-testid="cell-5"
               cellValue={cells[5]}
               onClick={() => handleClick(5)}
               isWinnerCell={winningIndexes?.includes(5)}
@@ -130,16 +136,19 @@ const Board = ({ xIsNext, cells, onPlay, totalMoves }: BoardProps) => {
           </Row>
           <Row>
             <Cell
+              data-testid="cell-6"
               cellValue={cells[6]}
               onClick={() => handleClick(6)}
               isWinnerCell={winningIndexes?.includes(6)}
             />
             <Cell
+              data-testid="cell-7"
               cellValue={cells[7]}
               onClick={() => handleClick(7)}
               isWinnerCell={winningIndexes?.includes(7)}
             />
             <Cell
+              data-testid="cell-8"
               cellValue={cells[8]}
               onClick={() => handleClick(8)}
               isWinnerCell={winningIndexes?.includes(8)}
