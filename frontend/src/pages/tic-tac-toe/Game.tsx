@@ -1,35 +1,14 @@
 import clsx from 'clsx';
 import { ArrowLeft, RefreshCwIcon } from 'lucide-react';
-import { Card } from './ui/Card';
-import { PrimaryButton } from './ui/PrimaryButton';
+import { Card } from '../../components/ui/Card';
+import { PrimaryButton } from '../../components/ui/PrimaryButton';
+import { SecondaryButton } from '../../components/ui/SecondaryButton';
+
 import { Link } from 'react-router';
-import bgPlants from '../assets/bgPlants.jpg';
+import bgPlants from '../../assets/bgPlants.jpg';
 import { ComponentPropsWithoutRef, useState } from 'react';
+import { calculateWinner, winningIndexes } from './helpers';
 
-let winningIndexes: Array<number>;
-
-function calculateWinner(cells: Array<'X' | 'O' | null>) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-  ];
-
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
-      winningIndexes = lines[i];
-      return cells[a];
-    }
-  }
-
-  return null;
-}
 interface CellProps extends ComponentPropsWithoutRef<'button'> {
   cellValue: string | null;
   isWinnerCell?: boolean;
@@ -37,6 +16,15 @@ interface CellProps extends ComponentPropsWithoutRef<'button'> {
 
 interface RowProps extends ComponentPropsWithoutRef<'div'> {
   children: React.ReactNode;
+}
+
+type Cells = Array<'X' | 'O' | null>;
+
+interface BoardProps {
+  xIsNext: boolean;
+  cells: Cells;
+  onPlay: (nextCells: Cells) => void;
+  totalMoves: number;
 }
 
 const Cell = ({ cellValue, isWinnerCell, ...props }: CellProps) => {
@@ -61,11 +49,8 @@ const Row = ({ children, ...props }: RowProps) => {
   );
 };
 
-export const TicTacToe = () => {
-  const [xIsNext, setXIsNext] = useState(true);
-  const [cells, setCells] = useState<Array<'X' | 'O' | null>>(Array(9).fill(null));
-  const [moves, setMoves] = useState(0);
-
+const Board = ({ xIsNext, cells, onPlay, totalMoves }: BoardProps) => {
+  console.log(totalMoves);
   function handleClick(i: number) {
     if (cells[i] || calculateWinner(cells)) {
       return;
@@ -76,25 +61,23 @@ export const TicTacToe = () => {
     } else {
       nextSquares[i] = 'O';
     }
-    setCells(nextSquares);
-    setXIsNext(!xIsNext);
-    setMoves((moves) => moves + 1);
+    onPlay(nextSquares);
   }
 
   const winner = calculateWinner(cells);
   let status;
+
   if (winner) {
     status = 'Winner: ' + winner;
   } else {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
 
+  const isDraw = !winner && totalMoves === 9;
+
   return (
-    <div
-      className="bg-no-repeat bg-center bg-cover w-full h-screen py-10 sm:py-15 flex flex-col"
-      style={{ backgroundImage: `url(${bgPlants})` }}
-    >
-      <div className="w-80 md:w-120 flex justify-between mx-auto xl:ml-30 xl:mx-0">
+    <div className="w-80 md:w-120 flex flex-col mx-auto md:mx-20">
+      <div className="flex justify-between">
         <Link to="/">
           <PrimaryButton className="w-33 md:w-40">
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -106,9 +89,9 @@ export const TicTacToe = () => {
           New Game
         </PrimaryButton>
       </div>
-      <Card className="w-80 md:w-120 mx-auto xl:ml-30 xl:mx-0 pt-5 md:pt-10 pb-10 md:pb-20 px-2 md:px-4 mt-10 flex flex-col justify-center items-center">
+      <Card className="bg-[#feecd4] pt-5 md:pt-10 pb-10 md:pb-20 px-2 md:px-4 mt-10 flex flex-col justify-center items-center">
         <div className="mb-4 text-blue-900 text-2xl">
-          {moves === 9 ? <p>Game ended in a draw</p> : <p>{status}</p>}
+          {isDraw ? <p>Game ended in a draw</p> : <p>{status}</p>}
         </div>
         <div>
           <Row>
@@ -167,3 +150,52 @@ export const TicTacToe = () => {
     </div>
   );
 };
+
+export default function Game() {
+  const [xIsNext, setXIsNext] = useState(true);
+  const [history, setHistory] = useState<Array<Cells>>([Array(9).fill(null)]);
+  const [currentMove, setCurrentMove] = useState(0);
+  const currentCells = history[currentMove];
+
+  function handlePlay(nextCells: Cells) {
+    const nextHistory = [...history.slice(0, currentMove + 1), nextCells];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
+    setXIsNext(!xIsNext);
+  }
+
+  function jumpTo(nextMove: number) {
+    setCurrentMove(nextMove);
+    setXIsNext(nextMove % 2 === 0);
+  }
+
+  const moves = history.map((cells, move) => {
+    let description;
+
+    if (move > 0) {
+      description = `Go to move # ${move}`;
+    } else {
+      description = 'Go to game start';
+    }
+
+    return (
+      <li key={move}>
+        <SecondaryButton className="w-40 mb-4" onClick={() => jumpTo(move)}>
+          {description}
+        </SecondaryButton>
+      </li>
+    );
+  });
+
+  return (
+    <div
+      className="bg-no-repeat bg-center bg-cover w-full h-screen py-10 sm:py-15 px-2 sm:px-10 flex flex-col md:flex-row"
+      style={{ backgroundImage: `url(${bgPlants})` }}
+    >
+      <Board xIsNext={xIsNext} cells={currentCells} onPlay={handlePlay} totalMoves={currentMove} />
+      <Card className="bg-[#feecd4] w-80 sm:w-fit h-fit px-2 py-2 mx-auto my-4 sm:mx-10 flex flex-col justify-center items-center">
+        <ol>{moves}</ol>
+      </Card>
+    </div>
+  );
+}
