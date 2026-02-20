@@ -6,7 +6,9 @@ import { Link } from 'react-router';
 import bgPlants from '../assets/bgPlants.jpg';
 import { ComponentPropsWithoutRef, useState } from 'react';
 
-function calculateWinner(squares: Array<'X' | 'O' | null>) {
+let winningIndexes: Array<number>;
+
+function calculateWinner(cells: Array<'X' | 'O' | null>) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -17,29 +19,32 @@ function calculateWinner(squares: Array<'X' | 'O' | null>) {
     [0, 4, 8],
     [2, 4, 6]
   ];
+
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+    if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+      winningIndexes = lines[i];
+      return cells[a];
     }
   }
+
   return null;
 }
 interface CellProps extends ComponentPropsWithoutRef<'button'> {
   cellValue: string | null;
-  className?: string;
+  isWinnerCell?: boolean;
 }
 
 interface RowProps extends ComponentPropsWithoutRef<'div'> {
   children: React.ReactNode;
 }
 
-const Cell = ({ cellValue, className, ...props }: CellProps) => {
+const Cell = ({ cellValue, isWinnerCell, ...props }: CellProps) => {
   return (
     <button
       className={clsx(
-        'w-18 h-18 text-3xl text-green-950 border border-blue-900 rounded-sm hover:bg-green-200',
-        className
+        'w-18 h-18 text-3xl text-green-950 border border-blue-900 rounded-sm',
+        isWinnerCell ? 'bg-blue-300 hover:bg-blue-300' : 'bg-none hover:bg-green-200'
       )}
       {...props}
     >
@@ -58,25 +63,25 @@ const Row = ({ children, ...props }: RowProps) => {
 
 export const TicTacToe = () => {
   const [xIsNext, setXIsNext] = useState(true);
-  const [squares, setSquares] = useState<Array<'X' | 'O' | null>>(Array(9).fill(null));
+  const [cells, setCells] = useState<Array<'X' | 'O' | null>>(Array(9).fill(null));
   const [moves, setMoves] = useState(0);
 
   function handleClick(i: number) {
-    if (squares[i] || calculateWinner(squares)) {
+    if (cells[i] || calculateWinner(cells)) {
       return;
     }
-    const nextSquares = squares.slice();
+    const nextSquares = cells.slice();
     if (xIsNext) {
       nextSquares[i] = 'X';
     } else {
       nextSquares[i] = 'O';
     }
-    setSquares(nextSquares);
+    setCells(nextSquares);
     setXIsNext(!xIsNext);
     setMoves((moves) => moves + 1);
   }
 
-  const winner = calculateWinner(squares);
+  const winner = calculateWinner(cells);
   let status;
   if (winner) {
     status = 'Winner: ' + winner;
@@ -107,19 +112,55 @@ export const TicTacToe = () => {
         </div>
         <div>
           <Row>
-            <Cell cellValue={squares[0]} onClick={() => handleClick(0)} />
-            <Cell cellValue={squares[1]} onClick={() => handleClick(1)} />
-            <Cell cellValue={squares[2]} onClick={() => handleClick(2)} />
+            <Cell
+              cellValue={cells[0]}
+              onClick={() => handleClick(0)}
+              isWinnerCell={winningIndexes?.includes(0)}
+            />
+            <Cell
+              cellValue={cells[1]}
+              onClick={() => handleClick(1)}
+              isWinnerCell={winningIndexes?.includes(1)}
+            />
+            <Cell
+              cellValue={cells[2]}
+              onClick={() => handleClick(2)}
+              isWinnerCell={winningIndexes?.includes(2)}
+            />
           </Row>
           <Row>
-            <Cell cellValue={squares[3]} onClick={() => handleClick(3)} />
-            <Cell cellValue={squares[4]} onClick={() => handleClick(4)} />
-            <Cell cellValue={squares[5]} onClick={() => handleClick(5)} />
+            <Cell
+              cellValue={cells[3]}
+              onClick={() => handleClick(3)}
+              isWinnerCell={winningIndexes?.includes(3)}
+            />
+            <Cell
+              cellValue={cells[4]}
+              onClick={() => handleClick(4)}
+              isWinnerCell={winningIndexes?.includes(4)}
+            />
+            <Cell
+              cellValue={cells[5]}
+              onClick={() => handleClick(5)}
+              isWinnerCell={winningIndexes?.includes(5)}
+            />
           </Row>
           <Row>
-            <Cell cellValue={squares[6]} onClick={() => handleClick(6)} />
-            <Cell cellValue={squares[7]} onClick={() => handleClick(7)} />
-            <Cell cellValue={squares[8]} onClick={() => handleClick(8)} />
+            <Cell
+              cellValue={cells[6]}
+              onClick={() => handleClick(6)}
+              isWinnerCell={winningIndexes?.includes(6)}
+            />
+            <Cell
+              cellValue={cells[7]}
+              onClick={() => handleClick(7)}
+              isWinnerCell={winningIndexes?.includes(7)}
+            />
+            <Cell
+              cellValue={cells[8]}
+              onClick={() => handleClick(8)}
+              isWinnerCell={winningIndexes?.includes(8)}
+            />
           </Row>
         </div>
       </Card>
