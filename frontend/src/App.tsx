@@ -102,8 +102,8 @@ export const App = () => {
       <WordGuess />
 
       <Card>
-        Wanna waste some time with someting else?
-        <Link to={'tic-tac-toe'}>
+        Wanna procrastinate more?
+        <Link to={'tic-tac-toe'} className="mt-3 self-end">
           <PrimaryButton>Tic Tac Toe</PrimaryButton>
         </Link>
       </Card>
