@@ -93,18 +93,21 @@ describe('Item routes', () => {
       method: 'POST',
       body: JSON.stringify({ name: 'List' })
     });
-    const payload = { checklistId: checklist.body.id, name: 'Task' };
-    const created = await jsonRequest<Item>('/items', {
+    const payload = { name: 'Task' };
+    const created = await jsonRequest<Item>(`/checklists/${checklist.body.id}/items`, {
       method: 'POST',
       body: JSON.stringify(payload)
     });
     expect(created.status).toBe(201);
     expect(created.body.isChecked).toBe(false);
 
-    const updated = await jsonRequest<Item>(`/items/${created.body.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ isChecked: true })
-    });
+    const updated = await jsonRequest<Item>(
+      `/checklists/${checklist.body.id}/items/${created.body.id}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ isChecked: true })
+      }
+    );
     expect(updated.status).toBe(200);
     expect(updated.body.isChecked).toBe(true);
   });

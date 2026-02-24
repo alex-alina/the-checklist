@@ -46,21 +46,25 @@ export const deleteChecklist = (checklistId: string): Promise<number> =>
     headers: { 'Content-Type': 'application/json' }
   }).then((response) => response.status);
 
-export const deleteChecklistItem = (itemId: string): Promise<number> =>
-  fetch(`${baseUrl}/items/${itemId}`, {
+export const deleteChecklistItem = (checklistId: string, itemId: string): Promise<number> =>
+  fetch(`${baseUrl}/checklists/${checklistId}/items/${itemId}`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' }
   }).then((response) => response.status);
 
 export const createItem = (checklistId: string, name: string): Promise<Item> =>
-  fetch(`${baseUrl}/items`, {
+  fetch(`${baseUrl}/checklists/${checklistId}/items`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ checklistId, name })
   }).then((response) => handleResponse<Item>(response));
 
-export const toggleItem = (itemId: string, isChecked: boolean): Promise<Item> =>
-  fetch(`${baseUrl}/items/${itemId}`, {
+export const toggleItem = (
+  checklistId: string,
+  itemId: string,
+  isChecked: boolean
+): Promise<Item> =>
+  fetch(`${baseUrl}/checklists/${checklistId}/items/${itemId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ isChecked })

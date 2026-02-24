@@ -56,7 +56,7 @@ export const Checklist = () => {
   };
 
   const handleToggleItem = async (item: ChecklistItem) => {
-    const updated = await toggleItem(item.id, !item.isChecked);
+    const updated = await toggleItem(checklist.id, item.id, !item.isChecked);
 
     setChecklist((checklist) => {
       return {
@@ -69,7 +69,7 @@ export const Checklist = () => {
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    const status = await deleteChecklistItem(itemId);
+    const status = await deleteChecklistItem(checklist.id, itemId);
     if (status !== 204) {
       return;
     }

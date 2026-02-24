@@ -141,7 +141,7 @@ describe('Checklist', () => {
     fireEvent.click(checkbox);
 
     await waitFor(() => expect(checkbox).toBeChecked());
-    expect(mockedToggleItem).toHaveBeenCalledWith('item-1', true);
+    expect(mockedToggleItem).toHaveBeenCalledWith('checklist-1', 'item-1', true);
   });
 
   it('deletes an item when the delete API succeeds', async () => {
@@ -159,7 +159,7 @@ describe('Checklist', () => {
     const button = within(itemContainer.closest('div')!).getByRole('button');
     fireEvent.click(button);
 
-    await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('item-1'));
+    await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('checklist-1', 'item-1'));
     await waitFor(() => expect(screen.queryByText('Write tests')).not.toBeInTheDocument());
   });
 
@@ -178,7 +178,7 @@ describe('Checklist', () => {
     const itemContainer = await screen.findByText('Plan sprint');
     fireEvent.click(within(itemContainer.closest('div')!).getByRole('button'));
 
-    await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('item-2'));
+    await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('checklist-1', 'item-2'));
     expect(screen.getByText('Plan sprint')).toBeInTheDocument();
   });
 
