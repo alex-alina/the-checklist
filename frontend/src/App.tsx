@@ -101,10 +101,10 @@ export const App = () => {
 
       <WordGuess />
 
-      <Card>
+      <Card className="h-fit m-5 justify-center items-center">
         Wanna procrastinate more?
-        <Link to={'tic-tac-toe'} className="mt-3 self-end">
-          <PrimaryButton>Tic Tac Toe</PrimaryButton>
+        <Link to={'tic-tac-toe'} className="mt-3">
+          <PrimaryButton>Play Tic Tac Toe</PrimaryButton>
         </Link>
       </Card>
     </div>

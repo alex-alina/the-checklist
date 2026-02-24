@@ -1,11 +1,10 @@
 import clsx from 'clsx';
 import { ArrowLeft, RefreshCwIcon } from 'lucide-react';
-import { Card } from '../../components/ui/Card';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { SecondaryButton } from '../../components/ui/SecondaryButton';
 
 import { Link } from 'react-router';
-import bgPlants from '../../assets/bgPlants.jpg';
+import branches from '../../assets/branches.jpg';
 import { ComponentPropsWithoutRef, useState } from 'react';
 import { calculateWinner, winningIndexes } from './helpers';
 
@@ -24,15 +23,14 @@ interface BoardProps {
   xIsNext: boolean;
   cells: Cells;
   onPlay: (nextCells: Cells) => void;
-  totalMoves: number;
 }
 
 const Cell = ({ cellValue, isWinnerCell, ...props }: CellProps) => {
   return (
     <button
       className={clsx(
-        'w-18 h-18 text-3xl text-green-950 border border-blue-900 rounded-sm',
-        isWinnerCell ? 'bg-blue-300 hover:bg-blue-300' : 'bg-none hover:bg-green-200'
+        'w-20 h-20 text-3xl text-green-950 border border-blue-900 rounded-sm',
+        isWinnerCell ? 'bg-blue-300 hover:bg-blue-300' : 'bg-white hover:bg-green-200'
       )}
       {...props}
     >
@@ -49,18 +47,19 @@ const Row = ({ children, ...props }: RowProps) => {
   );
 };
 
-const Board = ({ xIsNext, cells, onPlay, totalMoves }: BoardProps) => {
-  console.log(totalMoves);
+const Board = ({ xIsNext, cells, onPlay }: BoardProps) => {
   function handleClick(i: number) {
     if (cells[i] || calculateWinner(cells)) {
       return;
     }
     const nextSquares = cells.slice();
+
     if (xIsNext) {
       nextSquares[i] = 'X';
     } else {
       nextSquares[i] = 'O';
     }
+
     onPlay(nextSquares);
   }
 
@@ -73,10 +72,10 @@ const Board = ({ xIsNext, cells, onPlay, totalMoves }: BoardProps) => {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
 
-  const isDraw = !winner && totalMoves === 9;
+  const isDraw = !winner && cells.every((cell) => cell !== null);
 
   return (
-    <div className="w-80 md:w-120 flex flex-col mx-auto md:mx-20">
+    <div className="w-80 md:w-160 flex flex-col mx-auto">
       <div className="flex justify-between">
         <Link to="/">
           <PrimaryButton className="w-33 md:w-40">
@@ -89,9 +88,12 @@ const Board = ({ xIsNext, cells, onPlay, totalMoves }: BoardProps) => {
           New Game
         </PrimaryButton>
       </div>
-      <Card className="bg-[#feecd4] pt-5 md:pt-10 pb-10 md:pb-20 px-2 md:px-4 mt-10 flex flex-col justify-center items-center">
+      <div
+        className="bg-no-repeat bg-center bg-cover border rounded-xl border-blue-800 w-full p-10 text-lg pt-5 md:pt-10 pb-10 md:pb-20 px-2 md:px-4 mt-10 flex flex-col justify-center items-center"
+        style={{ backgroundImage: `url(${branches})` }}
+      >
         <div className="mb-4 text-blue-900 text-2xl">
-          {isDraw ? <p>Game ended in a draw</p> : <p>{status}</p>}
+          {isDraw ? <p data-testid="draw-ending-title">Game ended in a draw</p> : <p>{status}</p>}
         </div>
         <div>
           <Row>
@@ -155,7 +157,7 @@ const Board = ({ xIsNext, cells, onPlay, totalMoves }: BoardProps) => {
             />
           </Row>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };
@@ -189,7 +191,7 @@ export default function Game() {
 
     return (
       <li key={move}>
-        <SecondaryButton className="w-40 mb-4" onClick={() => jumpTo(move)}>
+        <SecondaryButton className="w-40 mb-4 text-lg" onClick={() => jumpTo(move)}>
           {description}
         </SecondaryButton>
       </li>
@@ -197,14 +199,11 @@ export default function Game() {
   });
 
   return (
-    <div
-      className="bg-no-repeat bg-center bg-cover w-full h-screen py-10 sm:py-15 px-2 sm:px-10 flex flex-col md:flex-row"
-      style={{ backgroundImage: `url(${bgPlants})` }}
-    >
-      <Board xIsNext={xIsNext} cells={currentCells} onPlay={handlePlay} totalMoves={currentMove} />
-      <Card className="bg-[#feecd4] w-80 sm:w-fit h-fit px-2 py-2 mx-auto my-4 sm:mx-10 flex flex-col justify-center items-center">
+    <div className="w-full py-10 sm:py-15 px-2 sm:px-10 flex flex-col-reverse sm:flex-row bg">
+      <div className="flex justify-center mt-8 sm:mt-0 mr-0 sm:mr-6">
         <ol>{moves}</ol>
-      </Card>
+      </div>
+      <Board xIsNext={xIsNext} cells={currentCells} onPlay={handlePlay} />
     </div>
   );
 }

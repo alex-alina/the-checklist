@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import Game from './Game';
@@ -22,11 +22,15 @@ describe('tic-tac-toe Game page', () => {
 
     const clickOrder = [0, 1, 2, 3, 5, 4, 7, 6, 8];
     for (const index of clickOrder) {
-      await user.click(screen.getByTestId(`cell-${index}`));
+      await act(async () => {
+        await user.click(screen.getByTestId(`cell-${index}`));
+      });
     }
 
-    expect(screen.queryByText('Game ended in a draw')).toBeNull();
-    expect(await screen.findByText('Winner: X')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('Game ended in a draw')).toBeNull();
+      expect(screen.getByText('Winner: X')).toBeInTheDocument();
+    });
   });
 
   test('shows a draw message when the board is full and no one wins', async () => {
@@ -35,10 +39,14 @@ describe('tic-tac-toe Game page', () => {
 
     const clickOrder = [0, 1, 2, 6, 3, 4, 7, 5, 8];
     for (const index of clickOrder) {
-      await user.click(screen.getByTestId(`cell-${index}`));
+      await act(async () => {
+        await user.click(screen.getByTestId(`cell-${index}`));
+      });
     }
 
-    expect(await screen.findByText('Game ended in a draw')).toBeInTheDocument();
-    expect(screen.queryByText('Winner:')).toBeNull();
+    await waitFor(() => {
+      expect(screen.getByText('Game ended in a draw')).toBeInTheDocument();
+      expect(screen.queryByText('Winner:')).toBeNull();
+    });
   });
 });

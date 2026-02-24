@@ -11,7 +11,7 @@ export const SecondaryButton = ({ children, className, ...props }: SecondaryButt
     <button
       {...props}
       className={clsx(
-        'flex justify-center items-center bg-green-100 border-2 text-blue-800 border-blue-800 h-10 px-3 py-2 rounded-md',
+        'flex justify-center items-center bg-white/95 border-2 text-blue-800 border-blue-800 h-10 px-3 py-2 rounded-md',
         className
       )}
     >

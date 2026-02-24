@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WordGuess } from '../components/WordGuessing';
 import * as codeWords from '../utils/codeDecodeWords';
@@ -47,7 +47,9 @@ describe('WordGuess', () => {
 
     render(<WordGuess />);
     const user = userEvent.setup();
-    await user.type(screen.getByPlaceholderText(/start decoding/i), decoded);
+    await act(async () => {
+      await user.type(screen.getByPlaceholderText(/start decoding/i), decoded);
+    });
 
     expect(screen.getByText(/Amazing job!/i)).toBeInTheDocument();
     expect(screen.getByText(codeGamePrizes[2].text)).toBeInTheDocument();
