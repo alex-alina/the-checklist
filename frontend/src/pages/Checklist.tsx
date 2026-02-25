@@ -15,6 +15,12 @@ import { DangerButtonRound } from '../components/ui/DangerButtonRound';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { PrimaryButtonRound } from '../components/ui/PrimaryButtonRound';
 import clsx from 'clsx';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '../components/ui/Accordion';
 
 export const Checklist = () => {
   const initialChecklistState = {
@@ -195,26 +201,36 @@ export const Checklist = () => {
             </form>
           </header>
           <div className="flex flex-col w-full my-8">
-            {checklist &&
-              checklist.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between items-center w-80 sm:w-full mb-3"
-                >
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={item.isChecked}
-                      onChange={() => handleToggleItem(item)}
-                      className="w-4 h-4"
-                    />
-                    <span className={clsx('ml-2 text-xl', { 'text-slate-400': item.isChecked })}>
-                      {item.name}
-                    </span>
-                  </label>
-                  <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
-                </div>
-              ))}
+            <Accordion type="single" collapsible defaultValue="item-1">
+              {checklist &&
+                checklist.items.map((item) => (
+                  <>
+                    <AccordionItem value={item.name} key={item.id}>
+                      <AccordionTrigger>
+                        <div className="flex justify-between items-center w-80 sm:w-full mb-3">
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={item.isChecked}
+                              onChange={() => handleToggleItem(item)}
+                              className="w-4 h-4"
+                            />
+                            <span
+                              className={clsx('ml-2 text-xl', { 'text-slate-400': item.isChecked })}
+                            >
+                              {item.name}
+                            </span>
+                          </label>
+                          <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        Yes. It adheres to the WAI-ARIA design pattern.
+                      </AccordionContent>
+                    </AccordionItem>
+                  </>
+                ))}
+            </Accordion>
             {checklist && !checklist.items.length && <p>Add some items to your checklist.</p>}
           </div>
           {checklist.items.length > 1 && (
