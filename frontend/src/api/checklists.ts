@@ -46,6 +46,12 @@ export const deleteChecklist = (checklistId: string): Promise<number> =>
     headers: { 'Content-Type': 'application/json' }
   }).then((response) => response.status);
 
+export const deleteItems = (checklistId: string): Promise<number> =>
+  fetch(`${baseUrl}/checklists/${checklistId}/items`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  }).then((response) => response.status);
+
 export const deleteChecklistItem = (checklistId: string, itemId: string): Promise<number> =>
   fetch(`${baseUrl}/checklists/${checklistId}/items/${itemId}`, {
     method: 'DELETE',

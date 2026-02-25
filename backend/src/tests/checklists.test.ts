@@ -111,4 +111,29 @@ describe('Item routes', () => {
     expect(updated.status).toBe(200);
     expect(updated.body.isChecked).toBe(true);
   });
+
+  it('deletes all items of a checklist', async () => {
+    const checklist = await jsonRequest<Checklist>('/checklists', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'List' })
+    });
+
+    await jsonRequest<Item>(`/checklists/${checklist.body.id}/items`, {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Task 1' })
+    });
+    await jsonRequest<Item>(`/checklists/${checklist.body.id}/items`, {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Task 2' })
+    });
+
+    const removeAll = await jsonRequest(`/checklists/${checklist.body.id}/items`, {
+      method: 'DELETE'
+    });
+    expect(removeAll.status).toBe(204);
+
+    const fetched = await jsonRequest<Checklist>(`/checklists/${checklist.body.id}`);
+    expect(fetched.status).toBe(200);
+    expect(fetched.body.items).toHaveLength(0);
+  });
 });

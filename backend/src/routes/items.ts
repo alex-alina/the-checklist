@@ -43,6 +43,30 @@ router.post(
   }
 );
 
+router.delete(
+  '/',
+  async (req: Request<ParamsWithChecklistId>, res: Response, next: NextFunction) => {
+    try {
+      const checklistId = getChecklistId(req);
+      if (!checklistId) {
+        return res.status(400).json({ message: 'Checklist ID is required' });
+      }
+
+      const checklistRepo = AppDataSource.getRepository(Checklist);
+      const checklist = await checklistRepo.findOne({ where: { id: checklistId } });
+      if (!checklist) {
+        return res.status(404).json({ message: 'Checklist not found' });
+      }
+
+      const repository = AppDataSource.getRepository(Item);
+      await repository.delete({ checklist: { id: checklistId } });
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.put(
   '/:itemId',
   async (

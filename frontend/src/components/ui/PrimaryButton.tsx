@@ -11,7 +11,7 @@ export const PrimaryButton = ({ children, className, ...props }: PrimaryButtonPr
     <button
       {...props}
       className={clsx(
-        'flex justify-center items-center bg-blue-800 h-10 px-3 py-2 text-white rounded-md',
+        'flex justify-center items-center bg-blue-800 hover:bg-blue-500 h-10 px-3 py-2 text-white rounded-md',
         className
       )}
     >

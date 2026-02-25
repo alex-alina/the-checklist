@@ -3,14 +3,17 @@ import { Checklist as ChecklistProps, Item as ChecklistItem } from '../types';
 import {
   createItem,
   deleteChecklist,
+  deleteItems,
   deleteChecklistItem,
   fetchChecklist,
   toggleItem
 } from '../api/checklists';
 import { Link, useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Share2, PlusCircle, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Share2, CheckCircle2, PlusIcon } from 'lucide-react';
+import { DangerButton } from '../components/ui/DangerButton';
 import { DangerButtonRound } from '../components/ui/DangerButtonRound';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { PrimaryButtonRound } from '../components/ui/PrimaryButtonRound';
 
 export const Checklist = () => {
   const initialChecklistState = {
@@ -77,6 +80,18 @@ export const Checklist = () => {
     setChecklist((checklist) => ({
       ...checklist,
       items: checklist.items.filter((item) => item.id !== itemId)
+    }));
+  };
+
+  const handleDeletItems = async () => {
+    const status = await deleteItems(checklist.id);
+    if (status !== 204) {
+      return;
+    }
+
+    setChecklist((checklist) => ({
+      ...checklist,
+      items: []
     }));
   };
 
@@ -162,7 +177,7 @@ export const Checklist = () => {
               </div>
             )}
             <div className="flex items-center">
-              <h2 className="text-3xl my-6 mr-4">{checklist && checklist.name}</h2>
+              <h2 className="text-3xl my-4 mr-4">{checklist && checklist.name}</h2>
               <DangerButtonRound onClick={() => handleDeleteList(checklist.id)} />
             </div>
 
@@ -171,20 +186,19 @@ export const Checklist = () => {
                 value={newItemName}
                 onChange={(event) => setNewItemName(event.target.value)}
                 placeholder="Add new item"
-                className="block p-2 border border-b-blue-90 rounded-md my-2 sm:w-80 w-50"
+                className="block p-2 border border-b-blue-90 rounded-md my-2 sm:w-80 w-50 text-lg"
               />
-              <PrimaryButton type="submit" className="h-10 w-28 sm:w-30 ml-4">
-                <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Add item
-              </PrimaryButton>
+              <PrimaryButtonRound type="submit" className="h-10 w-10 ml-4">
+                <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              </PrimaryButtonRound>
             </form>
           </header>
-          <div className="flex flex-col w-full mt-6">
+          <div className="flex flex-col w-full my-8">
             {checklist &&
               checklist.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex justify-between items-center w-80 sm:w-full mb-2"
+                  className="flex justify-between items-center w-80 sm:w-full mb-3"
                 >
                   <label className="flex items-center">
                     <input
@@ -199,6 +213,15 @@ export const Checklist = () => {
               ))}
             {checklist && !checklist.items.length && <p>Add some items to your checklist.</p>}
           </div>
+          {checklist.items.length > 1 && (
+            <DangerButton
+              type="button"
+              className="mx-auto w-full text-lg"
+              onClick={() => handleDeletItems()}
+            >
+              Delete all Items
+            </DangerButton>
+          )}
         </div>
       ) : (
         <div className="text-xl italic w-fit mx-auto">Ups! This checklist does not exist.</div>

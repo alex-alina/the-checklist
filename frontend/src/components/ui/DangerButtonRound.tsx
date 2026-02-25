@@ -1,9 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { ComponentPropsWithoutRef } from 'react';
 
-export interface DangerButtonProps extends ComponentPropsWithoutRef<'button'> {
-  // handleClick: () => Promise<void>;
-}
+export interface DangerButtonProps extends ComponentPropsWithoutRef<'button'> {}
 
 export const DangerButtonRound = ({ ...props }: DangerButtonProps) => {
   return (
