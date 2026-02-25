@@ -45,6 +45,7 @@ describe('Checklist', () => {
   const mockedDeleteItem = api.deleteChecklistItem as jest.MockedFunction<
     typeof api.deleteChecklistItem
   >;
+  const mockedDeleteItems = api.deleteItems as jest.MockedFunction<typeof api.deleteItems>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -56,6 +57,7 @@ describe('Checklist', () => {
       checklist: { id: 'checklist-1' }
     });
     mockedDeleteItem.mockResolvedValue(204);
+    mockedDeleteItems.mockResolvedValue(204);
   });
 
   afterEach(() => {
@@ -111,7 +113,12 @@ describe('Checklist', () => {
     fireEvent.change(screen.getByPlaceholderText('Add new item'), {
       target: { value: '  Buy apples  ' }
     });
-    fireEvent.click(screen.getByRole('button', { name: /add item/i }));
+    const addItemInput = screen.getByPlaceholderText('Add new item');
+    const addItemForm = addItemInput.closest('form');
+    if (!addItemForm) {
+      throw new Error('Add item form not found');
+    }
+    fireEvent.click(within(addItemForm).getByRole('button'));
 
     expect(mockedCreateItem).toHaveBeenCalledWith('checklist-1', 'Buy apples');
     expect(await screen.findByText('Buy apples')).toBeInTheDocument();
@@ -180,6 +187,50 @@ describe('Checklist', () => {
 
     await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('checklist-1', 'item-2'));
     expect(screen.getByText('Plan sprint')).toBeInTheDocument();
+  });
+
+  it('deletes all items when the delete-all API succeeds', async () => {
+    mockedFetchChecklist.mockResolvedValue({
+      id: 'checklist-1',
+      name: 'Tasks',
+      items: [
+        { id: 'item-1', name: 'Plan sprint', isChecked: false, checklist: { id: 'checklist-1' } },
+        { id: 'item-2', name: 'Write docs', isChecked: false, checklist: { id: 'checklist-1' } }
+      ]
+    });
+
+    renderChecklist();
+
+    await screen.findByText('Plan sprint');
+    await screen.findByText('Write docs');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete all Items' }));
+
+    await waitFor(() => expect(mockedDeleteItems).toHaveBeenCalledWith('checklist-1'));
+    await waitFor(() => expect(screen.queryByText('Plan sprint')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText('Write docs')).not.toBeInTheDocument());
+    expect(screen.getByText('Add some items to your checklist.')).toBeInTheDocument();
+  });
+
+  it('keeps all items when the delete-all API returns a non-204 status', async () => {
+    mockedFetchChecklist.mockResolvedValue({
+      id: 'checklist-1',
+      name: 'Tasks',
+      items: [
+        { id: 'item-1', name: 'Plan sprint', isChecked: false, checklist: { id: 'checklist-1' } },
+        { id: 'item-2', name: 'Write docs', isChecked: false, checklist: { id: 'checklist-1' } }
+      ]
+    });
+    mockedDeleteItems.mockResolvedValue(500);
+
+    renderChecklist();
+
+    await screen.findByText('Plan sprint');
+    await screen.findByText('Write docs');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete all Items' }));
+
+    await waitFor(() => expect(mockedDeleteItems).toHaveBeenCalledWith('checklist-1'));
+    expect(screen.getByText('Plan sprint')).toBeInTheDocument();
+    expect(screen.getByText('Write docs')).toBeInTheDocument();
   });
 
   describe('sharing the checklist URL', () => {
