@@ -14,6 +14,7 @@ import { DangerButton } from '../components/ui/DangerButton';
 import { DangerButtonRound } from '../components/ui/DangerButtonRound';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { PrimaryButtonRound } from '../components/ui/PrimaryButtonRound';
+import clsx from 'clsx';
 
 export const Checklist = () => {
   const initialChecklistState = {
@@ -205,8 +206,11 @@ export const Checklist = () => {
                       type="checkbox"
                       checked={item.isChecked}
                       onChange={() => handleToggleItem(item)}
+                      className="w-4 h-4"
                     />
-                    <span className="ml-2 text-xl">{item.name}</span>
+                    <span className={clsx('ml-2 text-xl', { 'text-slate-400': item.isChecked })}>
+                      {item.name}
+                    </span>
                   </label>
                   <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
                 </div>
