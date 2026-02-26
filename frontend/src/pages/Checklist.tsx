@@ -279,7 +279,12 @@ export const Checklist = () => {
                           <input
                             type="checkbox"
                             checked={item.isChecked}
-                            onChange={() => handleToggleItem(item)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                            }}
+                            onChange={() => {
+                              handleToggleItem(item);
+                            }}
                             className="w-4 h-4"
                           />
                           <span className="ml-2 text-xl">{item.name}</span>
@@ -306,7 +311,9 @@ export const Checklist = () => {
                   </AccordionItem>
                 ))}
             </Accordion>
-            {checklist && !checklist.items.length && <p>Add some items to your checklist.</p>}
+            {checklist && !checklist.items.length && (
+              <p className="text-center">Add some items to your checklist.</p>
+            )}
           </div>
           {checklist.items.length > 1 && (
             <DangerButton
