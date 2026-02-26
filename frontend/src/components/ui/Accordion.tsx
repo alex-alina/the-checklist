@@ -67,7 +67,7 @@ function AccordionContent({
     >
       <div
         className={cn(
-          'border-t border-t-blue-300 px-3 py-4 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4',
+          'border-t border-t-blue-300 px-3 py-4 [&_a]:hover:text-foreground',
           className
         )}
       >

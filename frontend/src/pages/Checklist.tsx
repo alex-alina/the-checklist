@@ -6,7 +6,8 @@ import {
   deleteItems,
   deleteChecklistItem,
   fetchChecklist,
-  toggleItem
+  toggleItem,
+  updateItemQuantity
 } from '../api/checklists';
 import { Link, useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Share2, CheckCircle2, PlusIcon, MinusIcon, LinkIcon } from 'lucide-react';
@@ -110,6 +111,19 @@ export const Checklist = () => {
     });
   };
 
+  const handleUpdateItemQuantity = async (item: ChecklistItem, delta: number) => {
+    const current = item.quantity ?? 0;
+    const nextQuantity = Math.max(0, current + delta);
+    const updated = await updateItemQuantity(checklist.id, item.id, nextQuantity);
+
+    setChecklist((checklist) => ({
+      ...checklist,
+      items: checklist.items.map((currentItem) =>
+        currentItem.id === updated.id ? updated : currentItem
+      )
+    }));
+  };
+
   const handleDeleteItem = async (itemId: string) => {
     const status = await deleteChecklistItem(checklist.id, itemId);
     if (status !== 204) {
@@ -183,8 +197,8 @@ export const Checklist = () => {
   }, [shareMessage]);
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="flex flex-col  items-center h-16">
+    <div className="p-1 sm:p-8">
+      <div className="flex flex-col items-center h-16">
         <div className="flex justify-between w-full">
           <Link to="/">
             <PrimaryButton type="submit" className="w-40">
@@ -207,9 +221,10 @@ export const Checklist = () => {
           </div>
         )}
       </div>
+
       {checklist && checklist.id ? (
-        <div className="flex flex-col justify-center items-center w-fit max-w-xl mx-auto">
-          <header className="flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-center w-full md:w-xl max-w-xl mx-auto">
+          <div className="flex flex-col justify-center items-center w-full">
             {showDeleteListError && (
               <div className="text-lg px-3 py-2 text-red-800 border border-red-800 rounded-xl">
                 Someting went wrong. Please try again.
@@ -220,25 +235,24 @@ export const Checklist = () => {
               <DangerButtonRound onClick={() => handleDeleteList(checklist.id)} />
             </div>
 
-            <form onSubmit={handleAddItem} className="flex flex-col justify-center items-center">
-              <div className="flex items-center">
-                <input
-                  value={newItemName}
-                  onChange={(event) => setNewItemName(event.target.value)}
-                  placeholder="Add new item"
-                  className="block p-2 border border-b-blue-90 rounded-md my-2 w-80 text-lg"
-                />
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="url"
-                  value={newItemUrl}
-                  onChange={(event) => setNewItemUrl(event.target.value)}
-                  placeholder="Add item url"
-                  className="block p-2 border border-b-blue-90 rounded-md my-2 w-80 text-lg"
-                />
-              </div>
-              <div className="flex justify-start items-center">
+            <form
+              onSubmit={handleAddItem}
+              className="flex flex-col justify-center items-center w-full"
+            >
+              <input
+                value={newItemName}
+                onChange={(event) => setNewItemName(event.target.value)}
+                placeholder="Add new item"
+                className="p-2 border border-b-blue-90 rounded-md my-2 text-lg w-full"
+              />
+              <input
+                type="url"
+                value={newItemUrl}
+                onChange={(event) => setNewItemUrl(event.target.value)}
+                placeholder="Add item url"
+                className="p-2 border border-b-blue-90 rounded-md my-2 text-lg w-full"
+              />
+              <div className="flex justify-center items-center w-full">
                 <PrimaryButtonRound
                   type="button"
                   className="h-10 w-10 mr-4"
@@ -252,7 +266,7 @@ export const Checklist = () => {
                   value={newItemQuantity}
                   onChange={(event) => setNewItemQuantity(event.target.value)}
                   placeholder="0"
-                  className="block p-2 border border-b-blue-90 rounded-md my-2 w-50 text-lg"
+                  className="block p-2 border border-b-blue-90 rounded-md my-2 text-lg min-w-20"
                 />
                 <PrimaryButtonRound
                   type="button"
@@ -267,14 +281,14 @@ export const Checklist = () => {
                 Add item
               </PrimaryButton>
             </form>
-          </header>
+          </div>
           <div className="flex flex-col w-full my-8">
             <Accordion type="single" collapsible defaultValue="item-1">
               {checklist &&
                 checklist.items.map((item, index) => (
                   <AccordionItem value={item.name} key={item.id}>
                     <AccordionTrigger className={clsx({ 'bg-blue-50': index % 2 === 0 })}>
-                      <div className="flex justify-between items-center w-80 sm:w-full">
+                      <div className="flex justify-between items-center sm:w-full text-xl">
                         <label className="flex items-center">
                           <input
                             type="checkbox"
@@ -287,26 +301,52 @@ export const Checklist = () => {
                             }}
                             className="w-4 h-4"
                           />
-                          <span className="ml-2 text-xl">{item.name}</span>
+                          {item.quantity !== null &&
+                            item.quantity !== undefined &&
+                            item.quantity >= 1 && <p className="ml-2">{item.quantity}</p>}
+                          <span className="ml-2">{item.name}</span>
                         </label>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent
-                      className={clsx('flex justify-between items-center', {
-                        'bg-blue-50': index % 2 === 0
-                      })}
+                      className={clsx(
+                        'flex flex-col gap-2 sm:flex-row justify-center sm:justify-end items-center text-xl',
+                        {
+                          'bg-blue-50': index % 2 === 0,
+                          'justify-between': item.url
+                        }
+                      )}
                     >
-                      {item?.url ? (
+                      {item?.url && (
                         <div className="flex items-center text-lg text-blue-600">
                           <a rel="noreferrer" href={item.url} target="_blank">
                             Click here for details
                           </a>
                           <LinkIcon className="w-4 h-4 ml-2" />
                         </div>
-                      ) : (
-                        <div className="text-lg text-slate-600">No Url available.</div>
                       )}
-                      <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
+                      <div className="flex justify-between">
+                        <div className="flex items-center mr-4">
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleUpdateItemQuantity(item, -1);
+                            }}
+                          >
+                            <MinusIcon className="w-4 h-4 text-blue-600 font-bold" />
+                          </button>
+                          <p className="mx-2">{item.quantity ?? 0}</p>
+                          <button
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleUpdateItemQuantity(item, 1);
+                            }}
+                          >
+                            <PlusIcon className="w-4 h-4 text-blue-600 font-bold" />
+                          </button>
+                        </div>
+                        <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
                 ))}

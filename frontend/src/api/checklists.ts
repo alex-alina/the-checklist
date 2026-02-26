@@ -46,18 +46,6 @@ export const deleteChecklist = (checklistId: string): Promise<number> =>
     headers: { 'Content-Type': 'application/json' }
   }).then((response) => response.status);
 
-export const deleteItems = (checklistId: string): Promise<number> =>
-  fetch(`${baseUrl}/checklists/${checklistId}/items`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' }
-  }).then((response) => response.status);
-
-export const deleteChecklistItem = (checklistId: string, itemId: string): Promise<number> =>
-  fetch(`${baseUrl}/checklists/${checklistId}/items/${itemId}`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' }
-  }).then((response) => response.status);
-
 export const createItem = (
   checklistId: string,
   name: string,
@@ -80,3 +68,26 @@ export const toggleItem = (
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ isChecked })
   }).then((response) => handleResponse<Item>(response));
+
+export const updateItemQuantity = (
+  checklistId: string,
+  itemId: string,
+  quantity: number | null
+): Promise<Item> =>
+  fetch(`${baseUrl}/checklists/${checklistId}/items/${itemId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quantity })
+  }).then((response) => handleResponse<Item>(response));
+
+export const deleteItems = (checklistId: string): Promise<number> =>
+  fetch(`${baseUrl}/checklists/${checklistId}/items`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  }).then((response) => response.status);
+
+export const deleteChecklistItem = (checklistId: string, itemId: string): Promise<number> =>
+  fetch(`${baseUrl}/checklists/${checklistId}/items/${itemId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  }).then((response) => response.status);
