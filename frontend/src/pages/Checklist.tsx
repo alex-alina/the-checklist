@@ -9,7 +9,7 @@ import {
   toggleItem
 } from '../api/checklists';
 import { Link, useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Share2, CheckCircle2, PlusIcon, MinusIcon } from 'lucide-react';
+import { ArrowLeft, Share2, CheckCircle2, PlusIcon, MinusIcon, LinkIcon } from 'lucide-react';
 import { DangerButton } from '../components/ui/DangerButton';
 import { DangerButtonRound } from '../components/ui/DangerButtonRound';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
@@ -88,7 +88,7 @@ export const Checklist = () => {
   const handleIncreaseQuantity = () => {
     setNewItemQuantity((currentQuantity) => {
       if (currentQuantity === '') {
-        return '0';
+        return '1';
       }
       const quantityAsNumber = parseInt(currentQuantity);
 
@@ -184,7 +184,7 @@ export const Checklist = () => {
 
   return (
     <div className="p-4 sm:p-8">
-      <div className="flex flex-col  items-center h-28">
+      <div className="flex flex-col  items-center h-16">
         <div className="flex justify-between w-full">
           <Link to="/">
             <PrimaryButton type="submit" className="w-40">
@@ -271,10 +271,10 @@ export const Checklist = () => {
           <div className="flex flex-col w-full my-8">
             <Accordion type="single" collapsible defaultValue="item-1">
               {checklist &&
-                checklist.items.map((item) => (
+                checklist.items.map((item, index) => (
                   <AccordionItem value={item.name} key={item.id}>
-                    <AccordionTrigger>
-                      <div className="flex justify-between items-center w-80 sm:w-full mb-3">
+                    <AccordionTrigger className={clsx({ 'bg-blue-50': index % 2 === 0 })}>
+                      <div className="flex justify-between items-center w-80 sm:w-full">
                         <label className="flex items-center">
                           <input
                             type="checkbox"
@@ -282,15 +282,25 @@ export const Checklist = () => {
                             onChange={() => handleToggleItem(item)}
                             className="w-4 h-4"
                           />
-                          <span
-                            className={clsx('ml-2 text-xl', { 'text-slate-400': item.isChecked })}
-                          >
-                            {item.name}
-                          </span>
+                          <span className="ml-2 text-xl">{item.name}</span>
                         </label>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent>
+                    <AccordionContent
+                      className={clsx('flex justify-between items-center', {
+                        'bg-blue-50': index % 2 === 0
+                      })}
+                    >
+                      {item?.url ? (
+                        <div className="flex items-center text-lg text-blue-600">
+                          <a rel="noreferrer" href={item.url} target="_blank">
+                            Click here for details
+                          </a>
+                          <LinkIcon className="w-4 h-4 ml-2" />
+                        </div>
+                      ) : (
+                        <div className="text-lg text-slate-600">No Url available.</div>
+                      )}
                       <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
                     </AccordionContent>
                   </AccordionItem>
