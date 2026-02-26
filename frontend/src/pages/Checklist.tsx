@@ -310,10 +310,10 @@ export const Checklist = () => {
                     </AccordionTrigger>
                     <AccordionContent
                       className={clsx(
-                        'flex flex-col gap-2 sm:flex-row justify-center sm:justify-end items-center text-xl',
+                        'flex flex-col gap-2 sm:flex-row sm:justify-end justify-center items-center text-xl',
                         {
                           'bg-blue-50': index % 2 === 0,
-                          'justify-between': item.url
+                          'sm:justify-between': item.url
                         }
                       )}
                     >
@@ -326,7 +326,7 @@ export const Checklist = () => {
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <div className="flex items-center mr-4">
+                        <div className="flex items-center mr-6">
                           <button
                             onClick={(event) => {
                               event.stopPropagation();
