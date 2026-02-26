@@ -113,16 +113,29 @@ describe('Checklist', () => {
     fireEvent.change(screen.getByPlaceholderText('Add new item'), {
       target: { value: '  Buy apples  ' }
     });
+    fireEvent.change(screen.getByPlaceholderText('Add item url'), {
+      target: { value: '  https://example.com/apples  ' }
+    });
+    fireEvent.change(screen.getByPlaceholderText('0'), {
+      target: { value: '3' }
+    });
     const addItemInput = screen.getByPlaceholderText('Add new item');
     const addItemForm = addItemInput.closest('form');
     if (!addItemForm) {
       throw new Error('Add item form not found');
     }
-    fireEvent.click(within(addItemForm).getByRole('button'));
+    fireEvent.click(within(addItemForm).getByRole('button', { name: /add item/i }));
 
-    expect(mockedCreateItem).toHaveBeenCalledWith('checklist-1', 'Buy apples');
+    expect(mockedCreateItem).toHaveBeenCalledWith(
+      'checklist-1',
+      'Buy apples',
+      'https://example.com/apples',
+      3
+    );
     expect(await screen.findByText('Buy apples')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Add new item')).toHaveValue('');
+    expect(screen.getByPlaceholderText('Add item url')).toHaveValue('');
+    expect(screen.getByPlaceholderText('0')).toHaveValue(null);
   });
 
   it('toggles an item checkbox and updates the state', async () => {
@@ -162,9 +175,18 @@ describe('Checklist', () => {
 
     renderChecklist();
 
-    const itemContainer = await screen.findByText('Write tests');
-    const button = within(itemContainer.closest('div')!).getByRole('button');
-    fireEvent.click(button);
+    const itemTrigger = await screen.findByRole('button', { name: 'Write tests' });
+    fireEvent.click(itemTrigger);
+
+    const accordionItem = itemTrigger.closest('[data-slot="accordion-item"]');
+    if (!accordionItem) {
+      throw new Error('Accordion item not found');
+    }
+    const accordionContent = accordionItem.querySelector('[data-slot="accordion-content"]');
+    if (!accordionContent) {
+      throw new Error('Accordion content not found');
+    }
+    fireEvent.click(within(accordionContent as HTMLElement).getByRole('button'));
 
     await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('checklist-1', 'item-1'));
     await waitFor(() => expect(screen.queryByText('Write tests')).not.toBeInTheDocument());
@@ -182,8 +204,18 @@ describe('Checklist', () => {
 
     renderChecklist();
 
-    const itemContainer = await screen.findByText('Plan sprint');
-    fireEvent.click(within(itemContainer.closest('div')!).getByRole('button'));
+    const itemTrigger = await screen.findByRole('button', { name: 'Plan sprint' });
+    fireEvent.click(itemTrigger);
+
+    const accordionItem = itemTrigger.closest('[data-slot="accordion-item"]');
+    if (!accordionItem) {
+      throw new Error('Accordion item not found');
+    }
+    const accordionContent = accordionItem.querySelector('[data-slot="accordion-content"]');
+    if (!accordionContent) {
+      throw new Error('Accordion content not found');
+    }
+    fireEvent.click(within(accordionContent as HTMLElement).getByRole('button'));
 
     await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('checklist-1', 'item-2'));
     expect(screen.getByText('Plan sprint')).toBeInTheDocument();

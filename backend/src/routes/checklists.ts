@@ -48,6 +48,8 @@ router.post('/', async (req, res, next) => {
       const entity = new Item();
       entity.name = item.name ?? '';
       entity.isChecked = item.isChecked ?? false;
+      entity.url = item.url ?? null;
+      entity.quantity = item.quantity ?? null;
       return entity;
     });
     const repository = AppDataSource.getRepository(Checklist);
@@ -76,6 +78,8 @@ router.put('/:id', async (req, res, next) => {
         const entity = new Item();
         entity.name = item.name ?? '';
         entity.isChecked = item.isChecked ?? false;
+        entity.url = item.url ?? null;
+        entity.quantity = item.quantity ?? null;
         entity.checklist = checklist;
         return entity;
       });

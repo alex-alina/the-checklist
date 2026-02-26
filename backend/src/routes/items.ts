@@ -13,13 +13,17 @@ const getChecklistId = <T extends ParamsWithChecklistId>(req: Request<T>) => req
 router.post(
   '/',
   async (
-    req: Request<ParamsWithChecklistId, unknown, { name?: string; isChecked?: boolean }>,
+    req: Request<
+      ParamsWithChecklistId,
+      unknown,
+      { name?: string; isChecked?: boolean; url?: string; quantity?: number }
+    >,
     res: Response,
     next: NextFunction
   ) => {
     try {
       const checklistId = getChecklistId(req);
-      const { name, isChecked = false } = req.body;
+      const { name, isChecked = false, url, quantity } = req.body;
       if (!checklistId || !name) {
         return res.status(400).json({ message: 'Checklist ID and name are required' });
       }
@@ -32,6 +36,8 @@ router.post(
       const item = new Item();
       item.name = name;
       item.isChecked = isChecked;
+      item.url = url ?? null;
+      item.quantity = quantity ?? null;
       item.checklist = checklist;
 
       const repository = AppDataSource.getRepository(Item);
@@ -70,13 +76,17 @@ router.delete(
 router.put(
   '/:itemId',
   async (
-    req: Request<ItemParams, unknown, { name?: string; isChecked?: boolean }>,
+    req: Request<
+      ItemParams,
+      unknown,
+      { name?: string; isChecked?: boolean; url?: string | null; quantity?: number | null }
+    >,
     res: Response,
     next: NextFunction
   ) => {
     try {
       const checklistId = getChecklistId(req);
-      const { name, isChecked } = req.body;
+      const { name, isChecked, url, quantity } = req.body;
       const repository = AppDataSource.getRepository(Item);
       const item = await repository.findOne({
         where: { id: req.params.itemId },
@@ -90,6 +100,12 @@ router.put(
       }
       if (isChecked !== undefined) {
         item.isChecked = isChecked;
+      }
+      if (url !== undefined) {
+        item.url = url ?? null;
+      }
+      if (quantity !== undefined) {
+        item.quantity = quantity ?? null;
       }
       const updated = await repository.save(item);
       res.json(updated);

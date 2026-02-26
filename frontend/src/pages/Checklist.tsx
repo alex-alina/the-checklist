@@ -9,7 +9,7 @@ import {
   toggleItem
 } from '../api/checklists';
 import { Link, useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Share2, CheckCircle2, PlusIcon } from 'lucide-react';
+import { ArrowLeft, Share2, CheckCircle2, PlusIcon, MinusIcon } from 'lucide-react';
 import { DangerButton } from '../components/ui/DangerButton';
 import { DangerButtonRound } from '../components/ui/DangerButtonRound';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
@@ -31,6 +31,8 @@ export const Checklist = () => {
 
   const navigate = useNavigate();
   const [newItemName, setNewItemName] = useState('');
+  const [newItemUrl, setNewItemUrl] = useState('');
+  const [newItemQuantity, setNewItemQuantity] = useState('');
   const [checklist, setChecklist] = useState<ChecklistProps>(initialChecklistState);
   const [showDeleteListError, setShowDeleteListError] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
@@ -56,13 +58,43 @@ export const Checklist = () => {
   const handleAddItem = async (event: FormEvent) => {
     event.preventDefault();
     const name = newItemName.trim();
-    const item = await createItem(checklist.id, name);
+    const url = newItemUrl.trim() || undefined;
+    const parsedQuantity = newItemQuantity.trim() ? Number(newItemQuantity) : undefined;
+    const quantity =
+      parsedQuantity !== undefined && Number.isFinite(parsedQuantity) ? parsedQuantity : undefined;
+    const item = await createItem(checklist.id, name, url, quantity);
 
     setChecklist((checklist) => {
       return { ...checklist, items: [...checklist.items, item] };
     });
 
     setNewItemName('');
+    setNewItemUrl('');
+    setNewItemQuantity('');
+  };
+
+  const handleDecreaseQuantity = () => {
+    setNewItemQuantity((currentQuantity) => {
+      const quantityAsNumber = parseInt(currentQuantity);
+      if (quantityAsNumber === 0) {
+        return currentQuantity;
+      }
+
+      const newQuantity = quantityAsNumber - 1;
+      return newQuantity.toString();
+    });
+  };
+
+  const handleIncreaseQuantity = () => {
+    setNewItemQuantity((currentQuantity) => {
+      if (currentQuantity === '') {
+        return '0';
+      }
+      const quantityAsNumber = parseInt(currentQuantity);
+
+      const newQuantity = quantityAsNumber + 1;
+      return newQuantity.toString();
+    });
   };
 
   const handleToggleItem = async (item: ChecklistItem) => {
@@ -188,47 +220,80 @@ export const Checklist = () => {
               <DangerButtonRound onClick={() => handleDeleteList(checklist.id)} />
             </div>
 
-            <form onSubmit={handleAddItem} className="flex flex-row justify-center items-center">
-              <input
-                value={newItemName}
-                onChange={(event) => setNewItemName(event.target.value)}
-                placeholder="Add new item"
-                className="block p-2 border border-b-blue-90 rounded-md my-2 sm:w-80 w-50 text-lg"
-              />
-              <PrimaryButtonRound type="submit" className="h-10 w-10 ml-4">
-                <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              </PrimaryButtonRound>
+            <form onSubmit={handleAddItem} className="flex flex-col justify-center items-center">
+              <div className="flex items-center">
+                <input
+                  value={newItemName}
+                  onChange={(event) => setNewItemName(event.target.value)}
+                  placeholder="Add new item"
+                  className="block p-2 border border-b-blue-90 rounded-md my-2 w-80 text-lg"
+                />
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="url"
+                  value={newItemUrl}
+                  onChange={(event) => setNewItemUrl(event.target.value)}
+                  placeholder="Add item url"
+                  className="block p-2 border border-b-blue-90 rounded-md my-2 w-80 text-lg"
+                />
+              </div>
+              <div className="flex justify-start items-center">
+                <PrimaryButtonRound
+                  type="button"
+                  className="h-10 w-10 mr-4"
+                  onClick={() => handleDecreaseQuantity()}
+                >
+                  <MinusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                </PrimaryButtonRound>
+                <input
+                  type="number"
+                  name="quantity"
+                  value={newItemQuantity}
+                  onChange={(event) => setNewItemQuantity(event.target.value)}
+                  placeholder="0"
+                  className="block p-2 border border-b-blue-90 rounded-md my-2 w-50 text-lg"
+                />
+                <PrimaryButtonRound
+                  type="button"
+                  className="h-10 w-10 ml-4"
+                  onClick={() => handleIncreaseQuantity()}
+                >
+                  <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                </PrimaryButtonRound>
+              </div>
+              <PrimaryButton type="submit" className="mt-6 w-full">
+                <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                Add item
+              </PrimaryButton>
             </form>
           </header>
           <div className="flex flex-col w-full my-8">
             <Accordion type="single" collapsible defaultValue="item-1">
               {checklist &&
                 checklist.items.map((item) => (
-                  <>
-                    <AccordionItem value={item.name} key={item.id}>
-                      <AccordionTrigger>
-                        <div className="flex justify-between items-center w-80 sm:w-full mb-3">
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={item.isChecked}
-                              onChange={() => handleToggleItem(item)}
-                              className="w-4 h-4"
-                            />
-                            <span
-                              className={clsx('ml-2 text-xl', { 'text-slate-400': item.isChecked })}
-                            >
-                              {item.name}
-                            </span>
-                          </label>
-                          <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        Yes. It adheres to the WAI-ARIA design pattern.
-                      </AccordionContent>
-                    </AccordionItem>
-                  </>
+                  <AccordionItem value={item.name} key={item.id}>
+                    <AccordionTrigger>
+                      <div className="flex justify-between items-center w-80 sm:w-full mb-3">
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={item.isChecked}
+                            onChange={() => handleToggleItem(item)}
+                            className="w-4 h-4"
+                          />
+                          <span
+                            className={clsx('ml-2 text-xl', { 'text-slate-400': item.isChecked })}
+                          >
+                            {item.name}
+                          </span>
+                        </label>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
+                    </AccordionContent>
+                  </AccordionItem>
                 ))}
             </Accordion>
             {checklist && !checklist.items.length && <p>Add some items to your checklist.</p>}

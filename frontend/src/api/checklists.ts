@@ -58,11 +58,16 @@ export const deleteChecklistItem = (checklistId: string, itemId: string): Promis
     headers: { 'Content-Type': 'application/json' }
   }).then((response) => response.status);
 
-export const createItem = (checklistId: string, name: string): Promise<Item> =>
+export const createItem = (
+  checklistId: string,
+  name: string,
+  url?: string,
+  quantity?: number
+): Promise<Item> =>
   fetch(`${baseUrl}/checklists/${checklistId}/items`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ checklistId, name })
+    body: JSON.stringify({ checklistId, name, url, quantity })
   }).then((response) => handleResponse<Item>(response));
 
 export const toggleItem = (

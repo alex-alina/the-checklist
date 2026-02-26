@@ -51,7 +51,10 @@ describe('Checklist routes', () => {
   it('creates and retrieves a checklist', async () => {
     const payload = {
       name: 'Daily chores',
-      items: [{ name: 'Wash dishes' }, { name: 'Make bed', isChecked: true }]
+      items: [
+        { name: 'Wash dishes', url: 'https://example.com/dishes', quantity: 2 },
+        { name: 'Make bed', isChecked: true }
+      ]
     };
 
     const created = await jsonRequest<Checklist>('/checklists', {
@@ -61,10 +64,14 @@ describe('Checklist routes', () => {
     expect(created.status).toBe(201);
     expect(created.body.name).toBe(payload.name);
     expect(created.body.items).toHaveLength(2);
+    expect(created.body.items[0].url).toBe('https://example.com/dishes');
+    expect(created.body.items[0].quantity).toBe(2);
 
     const fetched = await jsonRequest<Checklist>(`/checklists/${created.body.id}`);
     expect(fetched.status).toBe(200);
     expect(fetched.body.items).toHaveLength(2);
+    expect(fetched.body.items[0].url).toBe('https://example.com/dishes');
+    expect(fetched.body.items[0].quantity).toBe(2);
   });
 
   it('updates checklist and replaces items', async () => {
@@ -93,13 +100,15 @@ describe('Item routes', () => {
       method: 'POST',
       body: JSON.stringify({ name: 'List' })
     });
-    const payload = { name: 'Task' };
+    const payload = { name: 'Task', url: 'https://example.com/task', quantity: 1 };
     const created = await jsonRequest<Item>(`/checklists/${checklist.body.id}/items`, {
       method: 'POST',
       body: JSON.stringify(payload)
     });
     expect(created.status).toBe(201);
     expect(created.body.isChecked).toBe(false);
+    expect(created.body.url).toBe('https://example.com/task');
+    expect(created.body.quantity).toBe(1);
 
     const updated = await jsonRequest<Item>(
       `/checklists/${checklist.body.id}/items/${created.body.id}`,
@@ -110,6 +119,26 @@ describe('Item routes', () => {
     );
     expect(updated.status).toBe(200);
     expect(updated.body.isChecked).toBe(true);
+
+    const withUrlUpdate = await jsonRequest<Item>(
+      `/checklists/${checklist.body.id}/items/${created.body.id}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ url: 'https://example.com/updated-task' })
+      }
+    );
+    expect(withUrlUpdate.status).toBe(200);
+    expect(withUrlUpdate.body.url).toBe('https://example.com/updated-task');
+
+    const withQuantityUpdate = await jsonRequest<Item>(
+      `/checklists/${checklist.body.id}/items/${created.body.id}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ quantity: 5 })
+      }
+    );
+    expect(withQuantityUpdate.status).toBe(200);
+    expect(withQuantityUpdate.body.quantity).toBe(5);
   });
 
   it('deletes all items of a checklist', async () => {

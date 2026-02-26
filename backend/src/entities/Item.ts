@@ -12,6 +12,12 @@ export class Item {
   @Column({ type: 'boolean', default: false })
   isChecked!: boolean;
 
+  @Column({ type: 'text', nullable: true })
+  url?: string | null;
+
+  @Column({ type: 'float', nullable: true })
+  quantity?: number | null;
+
   @ManyToOne(() => Checklist, (checklist) => checklist.items, { onDelete: 'CASCADE' })
   checklist!: Checklist;
 }
