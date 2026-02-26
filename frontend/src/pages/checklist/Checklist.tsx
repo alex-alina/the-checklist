@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { Checklist as ChecklistProps, Item as ChecklistItem } from '../types';
+import { Checklist as ChecklistProps, Item as ChecklistItem } from '../../types';
 import {
   createItem,
   deleteChecklist,
@@ -8,20 +8,21 @@ import {
   fetchChecklist,
   toggleItem,
   updateItemQuantity
-} from '../api/checklists';
-import { Link, useParams, useNavigate } from 'react-router';
-import { ArrowLeft, Share2, CheckCircle2, PlusIcon, MinusIcon, LinkIcon } from 'lucide-react';
-import { DangerButton } from '../components/ui/DangerButton';
-import { DangerButtonRound } from '../components/ui/DangerButtonRound';
-import { PrimaryButton } from '../components/ui/PrimaryButton';
-import { PrimaryButtonRound } from '../components/ui/PrimaryButtonRound';
+} from '../../api/checklists';
+import { useParams, useNavigate } from 'react-router';
+import { PlusIcon, MinusIcon, LinkIcon } from 'lucide-react';
+import { DangerButton } from '../../components/ui/DangerButton';
+import { DangerButtonRound } from '../../components/ui/DangerButtonRound';
+import { PrimaryButton } from '../../components/ui/PrimaryButton';
+import { PrimaryButtonRound } from '../../components/ui/PrimaryButtonRound';
 import clsx from 'clsx';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger
-} from '../components/ui/Accordion';
+} from '../../components/ui/Accordion';
+import { Header } from './Header';
 
 export const Checklist = () => {
   const initialChecklistState = {
@@ -198,29 +199,7 @@ export const Checklist = () => {
 
   return (
     <div className="p-1 sm:p-8">
-      <div className="flex flex-col items-center h-16">
-        <div className="flex justify-between w-full">
-          <Link to="/">
-            <PrimaryButton type="submit" className="w-40">
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Go back to lists
-            </PrimaryButton>
-          </Link>
-          <PrimaryButton type="button" className="w-40" onClick={shareChecklistUrl}>
-            <Share2 className="w-5 h-5 mr-2" />
-            Share checklist
-          </PrimaryButton>
-        </div>
-        {shareMessage && (
-          <div
-            className="flex text-md text-green-700 border border-green-600 rounded w-fit mt-2 px-3 py-2"
-            aria-live="polite"
-          >
-            <CheckCircle2 className="w-5 h-5 mr-3" />
-            {shareMessage}
-          </div>
-        )}
-      </div>
+      <Header shareMessage={shareMessage} shareChecklistUrl={shareChecklistUrl} />
 
       {checklist && checklist.id ? (
         <div className="flex flex-col justify-center items-center w-full md:w-xl max-w-xl mx-auto">
@@ -276,7 +255,7 @@ export const Checklist = () => {
                   <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </PrimaryButtonRound>
               </div>
-              <PrimaryButton type="submit" className="mt-6 w-full">
+              <PrimaryButton data-testid="add-item-submit" type="submit" className="mt-6 w-full">
                 <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Add item
               </PrimaryButton>
@@ -328,6 +307,7 @@ export const Checklist = () => {
                       <div className="flex justify-between">
                         <div className="flex items-center mr-6">
                           <button
+                            data-testid={`item-quantity-decrease-${item.id}`}
                             onClick={(event) => {
                               event.stopPropagation();
                               handleUpdateItemQuantity(item, -1);
@@ -337,6 +317,7 @@ export const Checklist = () => {
                           </button>
                           <p className="mx-2">{item.quantity ?? 0}</p>
                           <button
+                            data-testid={`item-quantity-increase-${item.id}`}
                             onClick={(event) => {
                               event.stopPropagation();
                               handleUpdateItemQuantity(item, 1);
@@ -345,7 +326,10 @@ export const Checklist = () => {
                             <PlusIcon className="w-4 h-4 text-blue-600 font-bold" />
                           </button>
                         </div>
-                        <DangerButtonRound onClick={() => handleDeleteItem(item.id)} />
+                        <DangerButtonRound
+                          data-testid={`item-delete-${item.id}`}
+                          onClick={() => handleDeleteItem(item.id)}
+                        />
                       </div>
                     </AccordionContent>
                   </AccordionItem>

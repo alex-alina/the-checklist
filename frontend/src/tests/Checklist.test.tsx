@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import { Checklist } from '../pages/Checklist';
+import { Checklist } from '../pages/checklist/Checklist';
 import * as api from '../api/checklists';
 
 jest.mock('../api/checklists');
@@ -15,7 +15,10 @@ const renderChecklist = () =>
   );
 
 describe('Checklist', () => {
-  const originalNavigatorShareDescriptor = Object.getOwnPropertyDescriptor(globalThis.navigator, 'share');
+  const originalNavigatorShareDescriptor = Object.getOwnPropertyDescriptor(
+    globalThis.navigator,
+    'share'
+  );
   const originalNavigatorClipboardDescriptor = Object.getOwnPropertyDescriptor(
     globalThis.navigator,
     'clipboard'
@@ -124,7 +127,7 @@ describe('Checklist', () => {
     if (!addItemForm) {
       throw new Error('Add item form not found');
     }
-    fireEvent.click(within(addItemForm).getByRole('button', { name: /add item/i }));
+    fireEvent.click(within(addItemForm).getByTestId('add-item-submit'));
 
     expect(mockedCreateItem).toHaveBeenCalledWith(
       'checklist-1',
@@ -186,7 +189,7 @@ describe('Checklist', () => {
     if (!accordionContent) {
       throw new Error('Accordion content not found');
     }
-    fireEvent.click(within(accordionContent as HTMLElement).getByRole('button'));
+    fireEvent.click(within(accordionContent as HTMLElement).getByTestId('item-delete-item-1'));
 
     await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('checklist-1', 'item-1'));
     await waitFor(() => expect(screen.queryByText('Write tests')).not.toBeInTheDocument());
@@ -215,7 +218,7 @@ describe('Checklist', () => {
     if (!accordionContent) {
       throw new Error('Accordion content not found');
     }
-    fireEvent.click(within(accordionContent as HTMLElement).getByRole('button'));
+    fireEvent.click(within(accordionContent as HTMLElement).getByTestId('item-delete-item-2'));
 
     await waitFor(() => expect(mockedDeleteItem).toHaveBeenCalledWith('checklist-1', 'item-2'));
     expect(screen.getByText('Plan sprint')).toBeInTheDocument();
@@ -335,7 +338,9 @@ describe('Checklist', () => {
       await prepareShareFlow('Work');
       fireEvent.click(shareButton());
 
-      expect(await screen.findByText('Unable to share the checklist right now.')).toBeInTheDocument();
+      expect(
+        await screen.findByText('Unable to share the checklist right now.')
+      ).toBeInTheDocument();
     });
   });
 });

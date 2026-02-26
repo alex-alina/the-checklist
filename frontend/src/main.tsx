@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { App } from './App';
-import { Checklist } from './pages/Checklist';
+import { Checklist } from './pages/checklist/Checklist';
 import './index.css';
 import Game from './pages/tic-tac-toe/Game';
 
