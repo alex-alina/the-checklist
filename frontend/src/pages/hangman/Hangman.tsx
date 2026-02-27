@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Input } from '../../components/ui/Input';
 import { Link } from 'react-router';
+import { SecondaryButton } from '../../components/ui/SecondaryButton';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
+
 import {
   ArrowLeft,
   Play,
@@ -66,7 +68,7 @@ export const Hangman = () => {
           Back
         </PrimaryButton>
       </Link>
-      <div className="mx-auto max-w-xl my-6 py-20 flex flex-col items-center justify-center bg-white/85 border-blue-900 rounded-xl w-fit min-w-4xl">
+      <div className="mx-auto my-6 py-20 px-2 flex flex-col items-center justify-center bg-white/95 border-blue-900 rounded-xl w-fit min-w-1/3">
         <div className="flex items-center">
           <Input
             value={wordInput}
@@ -77,15 +79,16 @@ export const Hangman = () => {
                 handleGameStart();
               }
             }}
+            className="placeholder:text-xl"
           />
-          <PrimaryButton
+          <SecondaryButton
             type="button"
             className="w-44 ml-4 text-xl"
             onClick={() => handleGameStart()}
           >
             <Play className="w-6 h-6 mr-4" />
             Start game
-          </PrimaryButton>
+          </SecondaryButton>
         </div>
         <div className="flex items-center">
           <Input
@@ -97,15 +100,16 @@ export const Hangman = () => {
                 handleCheckGuess();
               }
             }}
+            className="placeholder:text-xl"
           />
-          <PrimaryButton
+          <SecondaryButton
             type="button"
             className="w-44 ml-4 text-xl"
             onClick={() => handleCheckGuess()}
           >
             <CircleQuestionMark className="w-6 h-6 mr-2" />
             Check guess
-          </PrimaryButton>
+          </SecondaryButton>
         </div>
 
         {penaltyPoints === 0 ? (
