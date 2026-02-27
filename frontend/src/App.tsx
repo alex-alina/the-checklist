@@ -100,13 +100,21 @@ export const App = () => {
       </div>
 
       <WordGuess />
+      <div>
+        <Card className="h-fit m-5 justify-center items-center">
+          Wanna procrastinate more?
+          <Link to={'tic-tac-toe'} className="mt-3">
+            <PrimaryButton>Play Tic Tac Toe</PrimaryButton>
+          </Link>
+        </Card>
 
-      <Card className="h-fit m-5 justify-center items-center">
-        Wanna procrastinate more?
-        <Link to={'tic-tac-toe'} className="mt-3">
-          <PrimaryButton>Play Tic Tac Toe</PrimaryButton>
-        </Link>
-      </Card>
+        <Card className="h-fit m-5 justify-center items-center">
+          Fancy a Hangman?
+          <Link to={'hangman'} className="mt-3">
+            <PrimaryButton>Play Hangman</PrimaryButton>
+          </Link>
+        </Card>
+      </div>
     </div>
   );
 };

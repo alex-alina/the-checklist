@@ -5,6 +5,7 @@ import { App } from './App';
 import { Checklist } from './pages/checklist/Checklist';
 import './index.css';
 import Game from './pages/tic-tac-toe/Game';
+import { Hangman } from './pages/hangman/Hangman';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -13,6 +14,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Route path="/" element={<App />} />
         <Route path="/checklist/:id" element={<Checklist />} />
         <Route path="/tic-tac-toe" element={<Game />} />
+        <Route path="/hangman" element={<Hangman />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
