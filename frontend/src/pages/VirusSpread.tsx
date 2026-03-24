@@ -58,6 +58,7 @@ export const VirusSpread = () => {
     () => getConnectedCells(cellColors, startingPoint),
     [cellColors, startingPoint]
   );
+  const isGameCompleted = connectedCells.size === CELL_COUNT;
 
   const handleColorClick = (nextColor: string) => {
     setCellColors((previousColors) => {
@@ -78,7 +79,7 @@ export const VirusSpread = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 justify-center md:flex-row md:gap-6">
+    <div className="flex flex-col justify-center gap-4 md:flex-row md:gap-6">
       <div
         className={clsx(
           'inline-grid gap-0.5 rounded-md border border-slate-400 bg-slate-200 p-2 shadow-sm'
@@ -128,10 +129,16 @@ export const VirusSpread = () => {
           <button
             type="button"
             onClick={handleNewGame}
-            className="h-10 w-40 rounded-full text-xl border-blue-800 border-2 bg-white hover:bg-blue-700 hover:text-white"
+            className="h-10 w-40 rounded-full border-2 border-blue-800 bg-white text-xl hover:bg-blue-700 hover:text-white"
           >
             New game
           </button>
+
+          {isGameCompleted ? (
+            <div className="rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-sm font-semibold text-emerald-900">
+              Game completed
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
