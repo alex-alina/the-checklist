@@ -114,6 +114,12 @@ export const App = () => {
             <PrimaryButton>Play Hangman</PrimaryButton>
           </Link>
         </Card>
+        <Card className="h-fit m-5 justify-center items-center">
+          Virus spread prototype?
+          <Link to={'virus-spread'} className="mt-3">
+            <PrimaryButton>Play Virus Spread</PrimaryButton>
+          </Link>
+        </Card>
       </div>
     </div>
   );
