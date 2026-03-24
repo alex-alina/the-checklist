@@ -1,46 +1,130 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { SmilePlusIcon } from 'lucide-react';
+import { SecondaryButton } from '../components/ui/SecondaryButton';
+import happyVirus from '../assets/happy-virus.png';
 
-const CELL_COUNT = 64;
-const colors = ['bg-blue-600', 'bg-green-600', 'bg-orange-600', 'bg-violet-600'];
+const GRID_SIZE = 20;
+const CELL_SIZE_PX = 40;
+const CELL_COUNT = GRID_SIZE * GRID_SIZE;
+const colors = ['bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-violet-400'];
 
 const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
 const getRandomCellIndex = (cellCount: number) => Math.floor(Math.random() * cellCount);
 const extractColorName = (colorClass: string) =>
-  colorClass.match(/-([^-]+)-/)?.[1] ?? 'Change colour';
+  colorClass.match(/-([^-]+)-/)?.[1] ?? 'Select colour';
+
+const getNeighborIndices = (index: number) => {
+  const row = Math.floor(index / GRID_SIZE);
+  const col = index % GRID_SIZE;
+  const neighbors: number[] = [];
+
+  if (row > 0) neighbors.push(index - GRID_SIZE);
+  if (row < GRID_SIZE - 1) neighbors.push(index + GRID_SIZE);
+  if (col > 0) neighbors.push(index - 1);
+  if (col < GRID_SIZE - 1) neighbors.push(index + 1);
+
+  return neighbors;
+};
+
+const getConnectedCells = (board: string[], startIndex: number, color = board[startIndex]) => {
+  const connected = new Set<number>();
+  const stack = [startIndex];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+
+    if (current === undefined || connected.has(current) || board[current] !== color) {
+      continue;
+    }
+
+    connected.add(current);
+
+    getNeighborIndices(current).forEach((neighbor) => {
+      if (!connected.has(neighbor)) {
+        stack.push(neighbor);
+      }
+    });
+  }
+
+  return connected;
+};
 
 export const VirusSpread = () => {
-  const [cellColors] = useState(() => Array.from({ length: CELL_COUNT }, getRandomColor));
-  const [startingPoint] = useState(() => getRandomCellIndex(CELL_COUNT));
+  const [cellColors, setCellColors] = useState(() =>
+    Array.from({ length: CELL_COUNT }, getRandomColor)
+  );
+  const [startingPoint, setStartingPoint] = useState(() => getRandomCellIndex(CELL_COUNT));
+
+  const connectedCells = useMemo(
+    () => getConnectedCells(cellColors, startingPoint),
+    [cellColors, startingPoint]
+  );
+
+  const handleColorClick = (nextColor: string) => {
+    setCellColors((previousColors) => {
+      const currentlyConnected = getConnectedCells(previousColors, startingPoint);
+      const updatedColors = [...previousColors];
+
+      currentlyConnected.forEach((cellIndex) => {
+        updatedColors[cellIndex] = nextColor;
+      });
+
+      return updatedColors;
+    });
+  };
+
+  const handleNewGame = () => {
+    setCellColors(Array.from({ length: CELL_COUNT }, getRandomColor));
+    setStartingPoint(getRandomCellIndex(CELL_COUNT));
+  };
 
   return (
-    <div className="inline-flex flex-col gap-3">
-      <div className="my-4 flex justify-around gap-2">
+    <div className="flex flex-col items-center justify-center gap-3">
+      <div className="my-4 flex justify-around gap-5">
         {colors.map((colorClass) => (
           <button
             key={colorClass}
             type="button"
-            className={clsx('h-10 w-30 rounded border border-slate-700 text-white', colorClass)}
+            onClick={() => handleColorClick(colorClass)}
+            className={clsx('h-10 w-30 rounded-full text-xl capitalize text-gray-950', colorClass)}
           >
             {extractColorName(colorClass)}
           </button>
         ))}
       </div>
 
-      <div className="inline-grid grid-cols-8 grid-rows-8 gap-0.5 rounded-md border border-slate-400 bg-slate-200 p-2 shadow-sm">
-        {cellColors.map((cellColor, index) => (
-          <div
-            key={index}
-            className={clsx(
-              'flex h-20 w-20 items-center justify-center rounded-sm border border-slate-700 transition-colors',
-              cellColor
-            )}
-          >
-            {index === startingPoint ? <SmilePlusIcon className="h-8 w-8 text-white" /> : null}
-          </div>
-        ))}
+      <div className="max-h-[80vh] max-w-[95vw] overflow-auto rounded-md">
+        <div
+          className={clsx(
+            'inline-grid gap-0.5 rounded-md border border-slate-400 bg-slate-200 p-2 shadow-sm'
+          )}
+          style={{
+            gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`,
+            gridTemplateRows: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`
+          }}
+        >
+          {cellColors.map((cellColor, index) => {
+            const isConnected = connectedCells.has(index);
+
+            return (
+              <div
+                key={index}
+                className={clsx(
+                  'flex items-center justify-center rounded-sm transition-colors',
+                  cellColor,
+                  isConnected ? 'border-2 border-black' : 'border border-slate-700'
+                )}
+              >
+                {index === startingPoint ? <img src={happyVirus} /> : null}
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      <SecondaryButton type="button" onClick={handleNewGame} className="mt-3 w-fit text-xl">
+        Start new game
+      </SecondaryButton>
     </div>
   );
 };
