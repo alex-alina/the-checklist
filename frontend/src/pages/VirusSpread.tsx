@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import happyVirus from '../assets/happy-virus.png';
 
@@ -11,6 +11,15 @@ const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
 const getRandomCellIndex = (cellCount: number) => Math.floor(Math.random() * cellCount);
 const extractColorName = (colorClass: string) =>
   colorClass.match(/-([^-]+)-/)?.[1] ?? 'Select colour';
+
+const formatElapsedTime = (seconds: number) => {
+  const minutesPart = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const secondsPart = (seconds % 60).toString().padStart(2, '0');
+
+  return `${minutesPart}:${secondsPart}`;
+};
 
 const getNeighborIndices = (index: number) => {
   const row = Math.floor(index / GRID_SIZE);
@@ -53,12 +62,30 @@ export const VirusSpread = () => {
     Array.from({ length: CELL_COUNT }, getRandomColor)
   );
   const [startingPoint, setStartingPoint] = useState(() => getRandomCellIndex(CELL_COUNT));
+  const [gameStartedAt, setGameStartedAt] = useState(() => Date.now());
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [completedTimeSeconds, setCompletedTimeSeconds] = useState<number | null>(null);
 
   const connectedCells = useMemo(
     () => getConnectedCells(cellColors, startingPoint),
     [cellColors, startingPoint]
   );
   const isGameCompleted = connectedCells.size === CELL_COUNT;
+
+  useEffect(() => {
+    if (isGameCompleted) {
+      const finalSeconds = Math.floor((Date.now() - gameStartedAt) / 1000);
+      setCompletedTimeSeconds(finalSeconds);
+      setElapsedSeconds(0);
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - gameStartedAt) / 1000));
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [gameStartedAt, isGameCompleted]);
 
   const handleColorClick = (nextColor: string) => {
     setCellColors((previousColors) => {
@@ -76,13 +103,16 @@ export const VirusSpread = () => {
   const handleNewGame = () => {
     setCellColors(Array.from({ length: CELL_COUNT }, getRandomColor));
     setStartingPoint(getRandomCellIndex(CELL_COUNT));
+    setGameStartedAt(Date.now());
+    setElapsedSeconds(0);
+    setCompletedTimeSeconds(null);
   };
 
   return (
     <div className="flex flex-col justify-center gap-4 md:flex-row md:gap-6">
       <div
         className={clsx(
-          'inline-grid gap-0.5 rounded-md border border-slate-400 bg-slate-200 p-2 shadow-sm'
+          'inline-grid gap-0 rounded-md border border-slate-400 bg-slate-200 p-2 shadow-sm'
         )}
         style={{
           gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`,
@@ -112,6 +142,10 @@ export const VirusSpread = () => {
           Controls
         </div>
 
+        <div className="mb-4 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+          Time: <span className="font-semibold">{formatElapsedTime(elapsedSeconds)}</span>
+        </div>
+
         <div className="flex flex-col gap-6">
           {colors.map((colorClass) => (
             <button
@@ -135,8 +169,13 @@ export const VirusSpread = () => {
           </button>
 
           {isGameCompleted ? (
-            <div className="rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-sm font-semibold text-emerald-900">
-              Game completed
+            <div className="space-y-2">
+              <div className="w-fit rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-xl font-semibold text-emerald-900">
+                Game completed
+              </div>
+              <div className="text-sm font-medium text-slate-800">
+                Total time: {formatElapsedTime(completedTimeSeconds ?? 0)}
+              </div>
             </div>
           ) : null}
         </div>
