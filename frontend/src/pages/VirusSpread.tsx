@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { SecondaryButton } from '../components/ui/SecondaryButton';
 import happyVirus from '../assets/happy-virus.png';
 
 const GRID_SIZE = 20;
@@ -79,52 +78,62 @@ export const VirusSpread = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3">
-      <div className="my-4 flex justify-around gap-5">
-        {colors.map((colorClass) => (
-          <button
-            key={colorClass}
-            type="button"
-            onClick={() => handleColorClick(colorClass)}
-            className={clsx('h-10 w-30 rounded-full text-xl capitalize text-gray-950', colorClass)}
-          >
-            {extractColorName(colorClass)}
-          </button>
-        ))}
+    <div className="flex flex-col gap-4 justify-center md:flex-row md:gap-6">
+      <div
+        className={clsx(
+          'inline-grid gap-0.5 rounded-md border border-slate-400 bg-slate-200 p-2 shadow-sm'
+        )}
+        style={{
+          gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`,
+          gridTemplateRows: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`
+        }}
+      >
+        {cellColors.map((cellColor, index) => {
+          const isConnected = connectedCells.has(index);
+
+          return (
+            <div
+              key={index}
+              className={clsx(
+                'flex items-center justify-center rounded-sm transition-colors',
+                cellColor,
+                isConnected ? 'border-2 border-black' : 'border border-slate-700'
+              )}
+            >
+              {index === startingPoint ? <img src={happyVirus} alt="happy computer virus" /> : null}
+            </div>
+          );
+        })}
       </div>
 
-      <div className="max-h-[80vh] max-w-[95vw] overflow-auto rounded-md">
-        <div
-          className={clsx(
-            'inline-grid gap-0.5 rounded-md border border-slate-400 bg-slate-200 p-2 shadow-sm'
-          )}
-          style={{
-            gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`,
-            gridTemplateRows: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`
-          }}
-        >
-          {cellColors.map((cellColor, index) => {
-            const isConnected = connectedCells.has(index);
+      <div className="w-full rounded-md border border-slate-300 bg-slate-100 p-4 shadow-sm md:w-xl">
+        <div className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-600">
+          Controls
+        </div>
 
-            return (
-              <div
-                key={index}
-                className={clsx(
-                  'flex items-center justify-center rounded-sm transition-colors',
-                  cellColor,
-                  isConnected ? 'border-2 border-black' : 'border border-slate-700'
-                )}
-              >
-                {index === startingPoint ? <img src={happyVirus} /> : null}
-              </div>
-            );
-          })}
+        <div className="flex flex-col gap-6">
+          {colors.map((colorClass) => (
+            <button
+              key={colorClass}
+              type="button"
+              onClick={() => handleColorClick(colorClass)}
+              className={clsx(
+                'h-10 w-40 rounded-full text-xl capitalize text-gray-950',
+                colorClass
+              )}
+            >
+              {extractColorName(colorClass)}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={handleNewGame}
+            className="h-10 w-40 rounded-full text-xl border-blue-800 border-2 bg-white hover:bg-blue-700 hover:text-white"
+          >
+            New game
+          </button>
         </div>
       </div>
-
-      <SecondaryButton type="button" onClick={handleNewGame} className="mt-3 w-fit text-xl">
-        Start new game
-      </SecondaryButton>
     </div>
   );
 };
