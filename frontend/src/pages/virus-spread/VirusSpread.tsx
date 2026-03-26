@@ -4,6 +4,7 @@ import happyVirus from '../../assets/happy-virus.png';
 import {
   buildComponentGraph,
   buildNewGame,
+  buildTestGame,
   CELL_COUNT,
   colors,
   extractColorName,
@@ -16,7 +17,43 @@ import {
 const CELL_SIZE_PX = 30;
 
 export const VirusSpread = () => {
-  const initialGame = useMemo(() => buildNewGame(), []);
+  const isTestMode = useMemo(
+    () => new URLSearchParams(window.location.search).get('test') === '1',
+    []
+  );
+
+  const getTestGameFromStorage = () => {
+    if (!isTestMode) {
+      return null;
+    }
+
+    const stored = window.localStorage.getItem('virus-spread-seeded');
+    if (!stored) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(stored) as { board?: string[]; startIndex?: number };
+      if (!parsed.board || parsed.startIndex === undefined) {
+        return null;
+      }
+
+      return {
+        board: parsed.board,
+        startingPoint: parsed.startIndex
+      };
+    } catch {
+      return null;
+    }
+  };
+
+  const initialGame = useMemo(() => {
+    if (!isTestMode) {
+      return buildNewGame();
+    }
+
+    return getTestGameFromStorage() ?? buildTestGame();
+  }, [isTestMode]);
 
   const [cellColors, setCellColors] = useState(() => initialGame.board);
   const [startingPoint, setStartingPoint] = useState(() => initialGame.startingPoint);
@@ -93,7 +130,7 @@ export const VirusSpread = () => {
   };
 
   const handleNewGame = () => {
-    const nextGame = buildNewGame();
+    const nextGame = isTestMode ? getTestGameFromStorage() ?? buildTestGame() : buildNewGame();
 
     setCellColors(nextGame.board);
     setStartingPoint(nextGame.startingPoint);
@@ -127,6 +164,9 @@ export const VirusSpread = () => {
                 cellColor,
                 isConnected ? 'border-2 border-black' : 'border border-slate-700'
               )}
+              data-cell-index={index}
+              data-color={extractColorName(cellColor)}
+              data-connected={isConnected ? 'true' : 'false'}
             >
               {index === startingPoint ? (
                 <img src={happyVirus} alt="happy computer virus" className="h-6 w-6" />
@@ -147,13 +187,13 @@ export const VirusSpread = () => {
 
         <div className="mb-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
           Optimum steps (BFS):{' '}
-          <span className="font-semibold">
+          <span className="font-semibold" data-testid="optimal-steps">
             {isSolvingOptimal ? 'Calculating...' : optimalSteps === null ? 'N/A' : optimalSteps}
           </span>
         </div>
 
         <div className="mb-4 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
-          Steps taken: <span className="font-semibold">{stepsTaken}</span>
+          Steps taken: <span className="font-semibold" data-testid="steps-taken">{stepsTaken}</span>
         </div>
 
         <div className="flex flex-col gap-6">
@@ -163,6 +203,7 @@ export const VirusSpread = () => {
               type="button"
               onClick={() => handleColorClick(colorClass)}
               disabled={isGameCompleted}
+              data-color={colorClass}
               className={clsx(
                 'h-10 w-40 rounded-full text-xl capitalize text-gray-950 disabled:cursor-not-allowed disabled:opacity-60',
                 colorClass
@@ -181,7 +222,7 @@ export const VirusSpread = () => {
 
           {isGameCompleted ? (
             <div className="space-y-2">
-              <div className="w-fit rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-xl font-semibold text-emerald-900">
+              <div className="w-fit rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-xl font-semibold text-emerald-900" data-testid="game-completed">
                 Game completed
               </div>
               <div className="text-sm font-medium text-slate-800">

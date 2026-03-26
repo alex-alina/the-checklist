@@ -261,3 +261,28 @@ export const buildNewGame = (): GameSetup => {
     startingPoint: getRandomCellIndex(CELL_COUNT)
   };
 };
+
+export const TEST_STARTING_POINT = 0;
+
+export const buildTestGame = (): GameSetup => {
+  const board = Array.from({ length: CELL_COUNT }, (_, index) => {
+    const row = Math.floor(index / GRID_SIZE);
+    const col = index % GRID_SIZE;
+
+    if (row < GRID_SIZE / 2 && col < GRID_SIZE / 2) {
+      return colors[0];
+    }
+    if (row < GRID_SIZE / 2 && col >= GRID_SIZE / 2) {
+      return colors[1];
+    }
+    if (row >= GRID_SIZE / 2 && col < GRID_SIZE / 2) {
+      return colors[2];
+    }
+    return colors[3];
+  });
+
+  return {
+    board,
+    startingPoint: TEST_STARTING_POINT
+  };
+};
