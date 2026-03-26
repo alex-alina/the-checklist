@@ -6,7 +6,7 @@ import { Checklist } from './pages/checklist/Checklist';
 import './index.css';
 import Game from './pages/tic-tac-toe/Game';
 import { Hangman } from './pages/hangman/Hangman';
-import { VirusSpread } from './pages/VirusSpread';
+import { VirusSpread } from './pages/virus-spread/VirusSpread';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
