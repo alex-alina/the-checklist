@@ -21,7 +21,7 @@ const HEX_HEIGHT_PX = HEX_SIZE_PX * 2;
 const HEX_HORIZONTAL_SPACING_PX = HEX_WIDTH_PX + HEX_GAP_PX;
 const HEX_VERTICAL_SPACING_PX = HEX_SIZE_PX * 1.5 + HEX_GAP_PX;
 
-export const VirusSpread = () => {
+export const VirusSpreadHex = () => {
   const isTestMode = useMemo(
     () => new URLSearchParams(window.location.search).get('test') === '1',
     []
