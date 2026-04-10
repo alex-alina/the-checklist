@@ -170,8 +170,9 @@ export const VirusSpreadHex = () => {
               <div
                 key={index}
                 className={clsx(
-                  'absolute flex items-center justify-center transition-colors',
-                  cellColor
+                  'absolute flex items-center justify-center transition-colors transition-opacity',
+                  cellColor,
+                  isConnected ? 'opacity-100' : 'opacity-75'
                 )}
                 style={{
                   width: HEX_WIDTH_PX,
