@@ -16,7 +16,7 @@ import {
 
 const CELL_SIZE_PX = 30;
 
-export const VirusSpread = () => {
+export const SquaresVirusSpread = () => {
   const isTestMode = useMemo(
     () => new URLSearchParams(window.location.search).get('test') === '1',
     []
@@ -130,7 +130,7 @@ export const VirusSpread = () => {
   };
 
   const handleNewGame = () => {
-    const nextGame = isTestMode ? getTestGameFromStorage() ?? buildTestGame() : buildNewGame();
+    const nextGame = isTestMode ? (getTestGameFromStorage() ?? buildTestGame()) : buildNewGame();
 
     setCellColors(nextGame.board);
     setStartingPoint(nextGame.startingPoint);
@@ -193,7 +193,10 @@ export const VirusSpread = () => {
         </div>
 
         <div className="mb-4 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
-          Steps taken: <span className="font-semibold" data-testid="steps-taken">{stepsTaken}</span>
+          Steps taken:{' '}
+          <span className="font-semibold" data-testid="steps-taken">
+            {stepsTaken}
+          </span>
         </div>
 
         <div className="flex flex-col gap-6">
@@ -222,7 +225,10 @@ export const VirusSpread = () => {
 
           {isGameCompleted ? (
             <div className="space-y-2">
-              <div className="w-fit rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-xl font-semibold text-emerald-900" data-testid="game-completed">
+              <div
+                className="w-fit rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-xl font-semibold text-emerald-900"
+                data-testid="game-completed"
+              >
                 Game completed
               </div>
               <div className="text-sm font-medium text-slate-800">
