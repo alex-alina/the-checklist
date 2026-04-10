@@ -1,5 +1,5 @@
 export const SOLVER_CHUNK_SIZE = 2000;
-export const GRID_SIZE = 10;
+export const GRID_SIZE = 20;
 export const CELL_COUNT = GRID_SIZE * GRID_SIZE;
 export const colors = ['bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-violet-400'];
 
@@ -37,10 +37,35 @@ export const getNeighborIndices = (index: number) => {
   const col = index % GRID_SIZE;
   const neighbors: number[] = [];
 
-  if (row > 0) neighbors.push(index - GRID_SIZE);
-  if (row < GRID_SIZE - 1) neighbors.push(index + GRID_SIZE);
-  if (col > 0) neighbors.push(index - 1);
-  if (col < GRID_SIZE - 1) neighbors.push(index + 1);
+  const evenRow = row % 2 === 0;
+  const deltas = evenRow
+    ? [
+        [-1, -1],
+        [-1, 0],
+        [0, -1],
+        [0, 1],
+        [1, -1],
+        [1, 0]
+      ]
+    : [
+        [-1, 0],
+        [-1, 1],
+        [0, -1],
+        [0, 1],
+        [1, 0],
+        [1, 1]
+      ];
+
+  deltas.forEach(([dr, dc]) => {
+    const nextRow = row + dr;
+    const nextCol = col + dc;
+
+    if (nextRow < 0 || nextRow >= GRID_SIZE || nextCol < 0 || nextCol >= GRID_SIZE) {
+      return;
+    }
+
+    neighbors.push(nextRow * GRID_SIZE + nextCol);
+  });
 
   return neighbors;
 };

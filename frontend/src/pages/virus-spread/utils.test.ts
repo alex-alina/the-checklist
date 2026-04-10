@@ -16,6 +16,8 @@ import {
   solveExactlyAsync
 } from './utils';
 
+const sortIndices = (values: number[]) => [...values].sort((a, b) => a - b);
+
 const makeBoard = (fillColor = colors[0], overrides: Record<number, string> = {}) => {
   const board = Array.from({ length: CELL_COUNT }, () => fillColor);
 
@@ -28,7 +30,7 @@ const makeBoard = (fillColor = colors[0], overrides: Record<number, string> = {}
 
 describe('virus-spread utils', () => {
   it('exports expected constants', () => {
-    expect(GRID_SIZE).toBe(10);
+    expect(GRID_SIZE).toBe(20);
     expect(CELL_COUNT).toBe(GRID_SIZE * GRID_SIZE);
     expect(SOLVER_CHUNK_SIZE).toBe(2000);
     expect(colors.length).toBe(4);
@@ -53,9 +55,10 @@ describe('virus-spread utils', () => {
     expect(formatElapsedTime(61)).toBe('01:01');
   });
 
-  it('returns neighbor indices for corners and centers', () => {
-    expect(getNeighborIndices(0)).toEqual([10, 1]);
-    expect(getNeighborIndices(11)).toEqual([1, 21, 10, 12]);
+  it('returns neighbor indices for hex corners and centers', () => {
+    expect(sortIndices(getNeighborIndices(0))).toEqual([1, 20]);
+    expect(sortIndices(getNeighborIndices(11))).toEqual([10, 12, 30, 31]);
+    expect(sortIndices(getNeighborIndices(55))).toEqual([34, 35, 54, 56, 74, 75]);
   });
 
   it('finds connected cells of the same color', () => {

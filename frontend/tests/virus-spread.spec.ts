@@ -90,6 +90,7 @@ const buildOptimalSequence = (board: string[], startIndex: number) => {
 
 test('solves virus spread in test mode using the optimal number of steps', async ({ page }) => {
   await page.goto('/virus-spread?test=1');
+  await expect(page.locator('[data-cell-index]')).toHaveCount(CELL_COUNT);
 
   const optimalStepsLocator = page.getByTestId('optimal-steps');
   await expect(optimalStepsLocator).toHaveText(/^[0-9]+$/);
@@ -121,6 +122,7 @@ test('solves virus spread on a complex seeded board using the optimal number of 
   }, { board: seededGame.board, startIndex: seededGame.startingPoint });
 
   await page.goto('/virus-spread?test=1');
+  await expect(page.locator('[data-cell-index]')).toHaveCount(CELL_COUNT);
 
   const optimalStepsLocator = page.getByTestId('optimal-steps');
   await expect(optimalStepsLocator).toHaveText(/^[0-9]+$/);
