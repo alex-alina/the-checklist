@@ -1,23 +1,44 @@
-import { test, expect } from '@playwright/test';
-import { absorbColor, buildComponentGraph, buildTestGame, CELL_COUNT, colors } from '../src/pages/virus-spread/utils';
+import { test, expect, type TestInfo } from '@playwright/test';
+import {
+  absorbColor as absorbHexColor,
+  buildComponentGraph as buildHexComponentGraph,
+  buildTestGame as buildHexTestGame,
+  CELL_COUNT as HEX_CELL_COUNT,
+  colors as hexColors
+} from '../src/pages/virus-spread-hex/utils';
+import {
+  absorbColor as absorbSqColor,
+  buildComponentGraph as buildSqComponentGraph,
+  buildTestGame as buildSqTestGame,
+  CELL_COUNT as SQ_CELL_COUNT,
+  colors as sqColors
+} from '../src/pages/virus-spread-sq/utils';
 
-
-const buildSeededBoard = (seed: number) => {
+const buildSeededBoard = (seed: number, cellCount: number, colors: string[]) => {
   let state = seed >>> 0;
   const next = () => {
     state = (state * 1664525 + 1013904223) >>> 0;
     return state / 2 ** 32;
   };
 
-  return Array.from({ length: CELL_COUNT }, () => colors[Math.floor(next() * colors.length)]);
+  return Array.from({ length: cellCount }, () => colors[Math.floor(next() * colors.length)]);
 };
 
-const buildSeededGame = (seed: number) => ({
-  board: buildSeededBoard(seed),
+const buildSeededGame = (seed: number, cellCount: number, colors: string[]) => ({
+  board: buildSeededBoard(seed, cellCount, colors),
   startingPoint: 0
 });
 
-const buildOptimalSequence = (board: string[], startIndex: number) => {
+const buildReplayBoard = (cellCount: number, colors: string[]) =>
+  Array.from({ length: cellCount }, (_, index) => (index === 0 ? colors[0] : colors[1]));
+
+const buildOptimalSequence = (
+  board: string[],
+  startIndex: number,
+  colors: string[],
+  buildComponentGraph: (board: string[], startIndex: number) => any,
+  absorbColor: (mask: bigint, colorIndex: number, graph: any) => bigint
+) => {
   const graph = buildComponentGraph(board, startIndex);
   if (!graph) {
     throw new Error('Expected a valid component graph');
@@ -88,15 +109,45 @@ const buildOptimalSequence = (board: string[], startIndex: number) => {
   return sequence.reverse();
 };
 
-test('solves virus spread in test mode using the optimal number of steps', async ({ page }) => {
-  await page.goto('/virus-spread?test=1');
+const toUrl = (path: string, testInfo: TestInfo) => {
+  const baseURL =
+    (typeof testInfo.project.use.baseURL === 'string' && testInfo.project.use.baseURL) ||
+    process.env.PLAYWRIGHT_BASE_URL ||
+    'http://127.0.0.1:5173';
+  return new URL(path, baseURL).toString();
+};
+
+const solveAndAssert = async (
+  page: import('@playwright/test').Page,
+  testInfo: TestInfo,
+  {
+    path,
+    colors,
+    buildTestGame,
+    buildComponentGraph,
+    absorbColor
+  }: {
+    path: string;
+    colors: string[];
+    buildTestGame: () => { board: string[]; startingPoint: number };
+    buildComponentGraph: (board: string[], startIndex: number) => any;
+    absorbColor: (mask: bigint, colorIndex: number, graph: any) => bigint;
+  }
+) => {
+  await page.goto(toUrl(path, testInfo));
 
   const optimalStepsLocator = page.getByTestId('optimal-steps');
   await expect(optimalStepsLocator).toHaveText(/^[0-9]+$/);
 
   const optimalSteps = Number((await optimalStepsLocator.innerText()).trim());
   const testGame = buildTestGame();
-  const solution = buildOptimalSequence(testGame.board, testGame.startingPoint);
+  const solution = buildOptimalSequence(
+    testGame.board,
+    testGame.startingPoint,
+    colors,
+    buildComponentGraph,
+    absorbColor
+  );
 
   expect(solution.length).toBe(optimalSteps);
 
@@ -106,12 +157,33 @@ test('solves virus spread in test mode using the optimal number of steps', async
 
   await expect(page.getByTestId('game-completed')).toBeVisible();
   await expect(page.getByTestId('steps-taken')).toHaveText(String(optimalSteps));
-});
+};
 
-
-test('solves virus spread on a complex seeded board using the optimal number of steps', async ({ page }) => {
-  const seededGame = buildSeededGame(1337);
-  const solution = buildOptimalSequence(seededGame.board, seededGame.startingPoint);
+const solveAndAssertSeeded = async (
+  page: import('@playwright/test').Page,
+  testInfo: TestInfo,
+  {
+    path,
+    colors,
+    cellCount,
+    buildComponentGraph,
+    absorbColor
+  }: {
+    path: string;
+    colors: string[];
+    cellCount: number;
+    buildComponentGraph: (board: string[], startIndex: number) => any;
+    absorbColor: (mask: bigint, colorIndex: number, graph: any) => bigint;
+  }
+) => {
+  const seededGame = buildSeededGame(1337, cellCount, colors);
+  const solution = buildOptimalSequence(
+    seededGame.board,
+    seededGame.startingPoint,
+    colors,
+    buildComponentGraph,
+    absorbColor
+  );
 
   await page.addInitScript(({ board, startIndex }) => {
     window.localStorage.setItem(
@@ -120,7 +192,7 @@ test('solves virus spread on a complex seeded board using the optimal number of 
     );
   }, { board: seededGame.board, startIndex: seededGame.startingPoint });
 
-  await page.goto('/virus-spread?test=1');
+  await page.goto(toUrl(path, testInfo));
 
   const optimalStepsLocator = page.getByTestId('optimal-steps');
   await expect(optimalStepsLocator).toHaveText(/^[0-9]+$/);
@@ -134,4 +206,126 @@ test('solves virus spread on a complex seeded board using the optimal number of 
 
   await expect(page.getByTestId('game-completed')).toBeVisible();
   await expect(page.getByTestId('steps-taken')).toHaveText(String(optimalSteps));
+};
+
+const replayAndAssert = async (
+  page: import('@playwright/test').Page,
+  testInfo: TestInfo,
+  {
+    path,
+    colors,
+    cellCount,
+    board
+  }: {
+    path: string;
+    colors: string[];
+    cellCount: number;
+    board?: string[];
+  }
+) => {
+  const seededBoard = board ?? buildReplayBoard(cellCount, colors);
+
+  await page.addInitScript(({ seededBoard: storedBoard }) => {
+    window.localStorage.setItem(
+      'virus-spread-seeded',
+      JSON.stringify({ board: storedBoard, startIndex: 0 })
+    );
+  }, { seededBoard });
+
+  await page.goto(toUrl(path, testInfo));
+
+  const startCell = page.locator('[data-cell-index="0"]');
+  await expect(startCell).toHaveAttribute(
+    'data-color',
+    seededBoard[0].match(/-([^-]+)-/)?.[1] ?? ''
+  );
+
+  const nextColor = colors.find((color) => color !== seededBoard[0]) ?? colors[0];
+  await page.locator(`button[data-color="${nextColor}"]`).click();
+  await expect(startCell).toHaveAttribute(
+    'data-color',
+    nextColor.match(/-([^-]+)-/)?.[1] ?? ''
+  );
+
+  await page.getByRole('button', { name: /replay game/i }).click();
+  await expect(startCell).toHaveAttribute(
+    'data-color',
+    seededBoard[0].match(/-([^-]+)-/)?.[1] ?? ''
+  );
+};
+
+test('solves virus spread (square) in test mode using the optimal number of steps', async ({ page }, testInfo) => {
+  await solveAndAssert(page, testInfo, {
+    path: '/virus-spread-sq?test=1',
+    colors: sqColors,
+    buildTestGame: buildSqTestGame,
+    buildComponentGraph: buildSqComponentGraph,
+    absorbColor: absorbSqColor
+  });
+});
+
+test('solves virus spread (hex) in test mode using the optimal number of steps', async ({ page }, testInfo) => {
+  await solveAndAssert(page, testInfo, {
+    path: '/virus-spread-hex?test=1',
+    colors: hexColors,
+    buildTestGame: buildHexTestGame,
+    buildComponentGraph: buildHexComponentGraph,
+    absorbColor: absorbHexColor
+  });
+});
+
+test('solves virus spread (square) on a complex seeded board using the optimal number of steps', async ({ page }, testInfo) => {
+  await solveAndAssertSeeded(page, testInfo, {
+    path: '/virus-spread-sq?test=1',
+    colors: sqColors,
+    cellCount: SQ_CELL_COUNT,
+    buildComponentGraph: buildSqComponentGraph,
+    absorbColor: absorbSqColor
+  });
+});
+
+test('solves virus spread (hex) on a complex seeded board using the optimal number of steps', async ({ page }, testInfo) => {
+  await solveAndAssertSeeded(page, testInfo, {
+    path: '/virus-spread-hex?test=1',
+    colors: hexColors,
+    cellCount: HEX_CELL_COUNT,
+    buildComponentGraph: buildHexComponentGraph,
+    absorbColor: absorbHexColor
+  });
+});
+
+test('replay game restores the initial board (square)', async ({ page }, testInfo) => {
+  await replayAndAssert(page, testInfo, {
+    path: '/virus-spread-sq?test=1',
+    colors: sqColors,
+    cellCount: SQ_CELL_COUNT
+  });
+});
+
+test('replay game restores the initial board (hex)', async ({ page }, testInfo) => {
+  await replayAndAssert(page, testInfo, {
+    path: '/virus-spread-hex?test=1',
+    colors: hexColors,
+    cellCount: HEX_CELL_COUNT
+  });
+});
+
+test('replay game restores the initial board on a complex seeded board (square)', async ({ page }, testInfo) => {
+  const complexBoard = buildSeededBoard(2024, SQ_CELL_COUNT, sqColors);
+  await replayAndAssert(page, testInfo, {
+    path: '/virus-spread-sq?test=1',
+    colors: sqColors,
+    cellCount: SQ_CELL_COUNT,
+    board: complexBoard
+  });
+});
+
+test('replay game restores the initial board on a complex seeded board (hex)', async ({ page }, testInfo) => {
+  const complexBoard = buildSeededBoard(2024, HEX_CELL_COUNT, hexColors);
+  await replayAndAssert(page, testInfo, {
+    path: '/virus-spread-hex?test=1',
+    colors: hexColors,
+    cellCount: HEX_CELL_COUNT,
+    board: complexBoard
+  });
 });

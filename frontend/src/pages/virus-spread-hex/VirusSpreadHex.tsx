@@ -147,6 +147,17 @@ export const VirusSpreadHex = () => {
     setCompletedTimeSeconds(null);
   };
 
+  const handleReplayGame = () => {
+    setCellColors(initialGame.board);
+    setStartingPoint(initialGame.startingPoint);
+    setSolverBoard(initialGame.board);
+    setSolverStart(initialGame.startingPoint);
+    setStepsTaken(0);
+    setGameStartedAt(Date.now());
+    setElapsedSeconds(0);
+    setCompletedTimeSeconds(null);
+  };
+
   return (
     <div className="flex flex-col justify-center gap-4 md:flex-row md:gap-6">
       <div className="bg-blue-950 w-fit h-fit p-4 border rounded-2xl">
@@ -261,13 +272,22 @@ export const VirusSpreadHex = () => {
             ) : null}
           </div>
         </div>
-        <button
-          type="button"
-          onClick={handleNewGame}
-          className="h-10 w-full px-2 rounded-md bg-blue-600 text-xl hover:bg-blue-700 text-white"
-        >
-          New game
-        </button>
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={handleReplayGame}
+            className="h-10 flex-1 px-2 rounded-md bg-yellow-400 text-xl hover:bg-yellow-500 text-blue-900"
+          >
+            Replay game
+          </button>
+          <button
+            type="button"
+            onClick={handleNewGame}
+            className="h-10 flex-1 px-2 rounded-md bg-blue-600 text-xl hover:bg-blue-700 text-white"
+          >
+            New game
+          </button>
+        </div>
       </div>
     </div>
   );
