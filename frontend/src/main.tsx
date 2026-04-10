@@ -7,6 +7,7 @@ import './index.css';
 import Game from './pages/tic-tac-toe/Game';
 import { Hangman } from './pages/hangman/Hangman';
 import { VirusSpreadHex } from './pages/virus-spread-hex/VirusSpreadHex';
+import { VirusSpreadSq } from './pages/virus-spread-sq/VirusSpreadSq';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Route path="/tic-tac-toe" element={<Game />} />
         <Route path="/hangman" element={<Hangman />} />
         <Route path="/virus-spread-hex" element={<VirusSpreadHex />} />
+        <Route path="/virus-spread-sq" element={<VirusSpreadSq />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
