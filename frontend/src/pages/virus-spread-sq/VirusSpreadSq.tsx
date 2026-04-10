@@ -145,9 +145,7 @@ export const VirusSpreadSq = () => {
   return (
     <div className="flex flex-col justify-center gap-4 md:flex-row md:gap-6">
       <div
-        className={clsx(
-          'inline-grid gap-0 rounded-md border border-slate-400 bg-slate-200 p-2 shadow-sm h-fit'
-        )}
+        className={clsx('inline-grid gap-0 rounded-md border bg-blue-950 p-2 shadow-sm h-fit')}
         style={{
           gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`,
           gridTemplateRows: `repeat(${GRID_SIZE}, ${CELL_SIZE_PX}px)`
@@ -175,68 +173,80 @@ export const VirusSpreadSq = () => {
           );
         })}
       </div>
-
-      <div className="w-full rounded-md border border-slate-300 bg-slate-100 p-4 shadow-sm md:w-xl">
-        <div className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-600">
-          Controls
-        </div>
-
-        <div className="mb-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
-          Time: <span className="font-semibold">{formatElapsedTime(elapsedSeconds)}</span>
-        </div>
-
-        <div className="mb-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
-          Optimum steps (BFS):{' '}
-          <span className="font-semibold" data-testid="optimal-steps">
-            {isSolvingOptimal ? 'Calculating...' : optimalSteps === null ? 'N/A' : optimalSteps}
-          </span>
-        </div>
-
-        <div className="mb-4 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
-          Steps taken:{' '}
-          <span className="font-semibold" data-testid="steps-taken">
-            {stepsTaken}
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-6">
-          {colors.map((colorClass) => (
-            <button
-              key={colorClass}
-              type="button"
-              onClick={() => handleColorClick(colorClass)}
-              disabled={isGameCompleted}
-              data-color={colorClass}
-              className={clsx(
-                'h-10 w-40 rounded-full text-xl capitalize text-gray-950 disabled:cursor-not-allowed disabled:opacity-60',
-                colorClass
-              )}
-            >
-              {extractColorName(colorClass)}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={handleNewGame}
-            className="h-10 w-40 rounded-full border-2 border-blue-800 bg-white text-xl hover:bg-blue-700 hover:text-white"
-          >
-            New game
-          </button>
-
-          {isGameCompleted ? (
-            <div className="space-y-2">
-              <div
-                className="w-fit rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-xl font-semibold text-emerald-900"
-                data-testid="game-completed"
-              >
-                Game completed
+      <div className="w-full flex flex-col justify-between rounded-md border bg-blue-950 p-8 shadow-sm md:w-xl">
+        <div>
+          <div className="flex">
+            <div className="flex flex-col w-1/2">
+              <div className="mb-6 text-2xl font-bold uppercase tracking-wide text-white">
+                Controls
               </div>
-              <div className="text-sm font-medium text-slate-800">
-                Total time: {formatElapsedTime(completedTimeSeconds ?? 0)}
+              <div className="flex flex-wrap gap-6">
+                {colors.map((colorClass) => (
+                  <button
+                    key={colorClass}
+                    type="button"
+                    onClick={() => handleColorClick(colorClass)}
+                    disabled={isGameCompleted}
+                    data-color={colorClass}
+                    className={clsx(
+                      'h-10 w-20 rounded-md text-xl capitalize text-gray-950 disabled:cursor-not-allowed disabled:opacity-60 hover:opacity-80',
+                      colorClass
+                    )}
+                  >
+                    {extractColorName(colorClass)}
+                  </button>
+                ))}
               </div>
             </div>
-          ) : null}
+            <div className="flex flex-col w-1/2">
+              <div className="mb-6 text-2xl font-bold uppercase tracking-wide text-white">
+                Stats
+              </div>
+              <div className="mb-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+                Time: <span className="font-semibold">{formatElapsedTime(elapsedSeconds)}</span>
+              </div>
+
+              <div className="mb-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+                Optimum no. of steps:&nbsp;
+                {/* (BFS) */}
+                <span className="font-semibold" data-testid="optimal-steps">
+                  {isSolvingOptimal
+                    ? 'calculating...'
+                    : optimalSteps === null
+                      ? 'N/A'
+                      : optimalSteps}
+                </span>
+              </div>
+
+              <div className="mb-4 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+                Steps taken:{' '}
+                <span className="font-semibold" data-testid="steps-taken">
+                  {stepsTaken}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            {isGameCompleted ? (
+              <div className="space-y-2">
+                <div
+                  className="flex justify-center w-full my-6 rounded-md border border-emerald-700 bg-emerald-100 px-3 py-2 text-xl font-semibold text-emerald-900"
+                  data-testid="game-completed"
+                >
+                  Game completed in: {formatElapsedTime(completedTimeSeconds ?? 0)}
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={handleNewGame}
+          className="h-10 w-full px-2 rounded-md bg-blue-600 text-xl hover:bg-blue-700 text-white"
+        >
+          New game
+        </button>
       </div>
     </div>
   );

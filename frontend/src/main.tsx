@@ -6,12 +6,8 @@ import { Checklist } from './pages/checklist/Checklist';
 import './index.css';
 import Game from './pages/tic-tac-toe/Game';
 import { Hangman } from './pages/hangman/Hangman';
-<<<<<<< HEAD
-// import { SquaresVirusSpread } from './pages/virus-spread-squares/SquaresVirusSpread';
-=======
 import { VirusSpreadHex } from './pages/virus-spread-hex/VirusSpreadHex';
 import { VirusSpreadSq } from './pages/virus-spread-sq/VirusSpreadSq';
->>>>>>> hex-tiles
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -21,12 +17,8 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Route path="/checklist/:id" element={<Checklist />} />
         <Route path="/tic-tac-toe" element={<Game />} />
         <Route path="/hangman" element={<Hangman />} />
-<<<<<<< HEAD
-        {/* <Route path="/virus-spread" element={<SquaresVirusSpread />} /> */}
-=======
         <Route path="/virus-spread-hex" element={<VirusSpreadHex />} />
         <Route path="/virus-spread-sq" element={<VirusSpreadSq />} />
->>>>>>> hex-tiles
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

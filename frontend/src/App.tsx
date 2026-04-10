@@ -116,8 +116,11 @@ export const App = () => {
         </Card>
         <Card className="h-fit m-5 justify-center items-center">
           Virus spread prototype?
-          <Link to={'virus-spread'} className="mt-3">
+          <Link to={'virus-spread-sq'} className="mt-3">
             <PrimaryButton>Play Virus Spread</PrimaryButton>
+          </Link>
+          <Link to={'virus-spread-hex'} className="mt-3">
+            <PrimaryButton>Play Virus Spread Hex</PrimaryButton>
           </Link>
         </Card>
       </div>
